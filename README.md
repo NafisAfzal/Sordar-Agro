@@ -1,6 +1,6 @@
 # Sordar Agro — Online Aquarium Marketplace
 
-A Laravel 11 web application built for **CSE412 Software Engineering** (Group 05, Section 02).
+A Laravel 11 web application built for **CSE412 (Software Engineering )** .
 Sordar Agro is an online marketplace for aquarium hobbyists to buy fish (sold in pairs),
 aquatic plants, fish food, and equipment, with seller and admin workspaces, a simulated
 payment/courier flow, care guides, and a community knowledge board.
