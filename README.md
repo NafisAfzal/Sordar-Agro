@@ -1,6 +1,5 @@
 # Sordar Agro — Online Aquarium Marketplace
 
-A Laravel 11 web application built for **CSE412 (Software Engineering )** .
 Sordar Agro is an online marketplace for aquarium hobbyists to buy fish (sold in pairs),
 aquatic plants, fish food, and equipment, with seller and admin workspaces, a simulated
 payment/courier flow, care guides, and a community knowledge board.
@@ -77,22 +76,14 @@ Then open <http://127.0.0.1:8000>.
 ### Database configuration (`.env`)
 
 **MySQL (default):** create a database, then set:
-
-```
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=sordar_agro
 DB_USERNAME=root
 DB_PASSWORD=
-```
 
 **SQLite (quickest for testing):**
-
-```
-DB_CONNECTION=sqlite
-```
-
 ```bash
 touch database/database.sqlite
 php artisan migrate --seed
@@ -139,37 +130,27 @@ approval queue, and three published care guides.
 php artisan test
 ```
 
-A minimal PHPUnit scaffold is included (`tests/Feature`, `tests/Unit`). Tests run against an
-in-memory SQLite database (configured in `phpunit.xml`).
+A PHPUnit test suite is included (`tests/Feature`, `tests/Unit`), covering authentication and
+role-based redirects, cart/checkout/payment flows (including stock-safety edge cases), and
+authorization boundaries. Tests run against an in-memory SQLite database (configured in
+`phpunit.xml`).
 
 ---
 
 ## Project structure (high level)
-
-```
 app/
-  Http/Controllers/        Auth, storefront, cart, wishlist, checkout, payment,
-                           orders, care, community, Seller/*, Admin/*
-  Http/Middleware/         RoleMiddleware, EnsurePasswordChanged
-  Models/                  11 Eloquent models
-  Services/                InventoryService (restock notifications)
+Http/Controllers/ Auth, storefront, cart, wishlist, checkout, payment,
+orders, care, community, Seller/, Admin/
+Http/Middleware/ RoleMiddleware, EnsurePasswordChanged
+Models/ 11 Eloquent models
+Services/ InventoryService (restock notifications)
 database/
-  migrations/              13 migrations
-  seeders/                 User, Category, Product, CareGuide seeders
-  factories/               User & Product factories
-resources/views/           Blade views (layouts, partials, storefront, dashboards)
-routes/web.php             All named routes, grouped by role/middleware
-public/css/app.css         Ocean/aquarium theme
-```
-
+migrations/ 13 migrations
+seeders/ User, Category, Product, CareGuide seeders
+factories/ User & Product factories
+resources/views/ Blade views (layouts, partials, storefront, dashboards)
+routes/web.php All named routes, grouped by role/middleware
+public/css/app.css Ocean/aquarium theme
 ---
 
-## Academic honesty note
-
-This project was scaffolded as a learning deliverable for CSE412. Read through the code,
-run it, test each feature, and extend it — treat it as a starting point you understand and
-can defend, not a black box to submit unread.
-
----
-
-*Group 05 · Section 02 · CSE412 Software Engineering*
+*Developed as part of the CSE412 (Software Engineering) course.*
