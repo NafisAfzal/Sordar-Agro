@@ -64,6 +64,31 @@ class ProductController extends Controller
         return view('storefront.index', compact('products', 'categories'));
     }
 
+    /** JSON endpoint powering the navbar live‑search dropdown. */
+    public function suggestions(Request $request)
+    {
+        $term = trim((string) $request->query('q'));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $products = Product::approved()
+            ->with('variants', 'category')
+            ->where('name', 'like', "%{$term}%")
+            ->orderBy('name')
+            ->take(8)
+            ->get()
+            ->map(fn ($p) => [
+                'name'     => $p->name,
+                'url'      => route('products.show', $p),
+                'price'    => number_format($p->starting_price, 2),
+                'category' => $p->category->name ?? '',
+            ]);
+
+        return response()->json($products);
+    }
+
     /** Detailed product view with per-size variant switching. */
     public function show(Product $product)
     {

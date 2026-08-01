@@ -40,6 +40,7 @@ use App\Http\Controllers\Admin\CommunityController as AdminCommunityController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/search/suggestions', [ProductController::class, 'suggestions'])->name('products.suggestions');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
 Route::get('/care-guides', [CareGuideController::class, 'index'])->name('care.index');
