@@ -27,7 +27,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
                         <h6 class="fw-bold mb-3">Payment method</h6>
-                        <p class="small text-muted">Payments are <strong>simulated</strong> for this academic project — no real charge is made.</p>
+                    
                         <div class="form-check border rounded p-3 mb-2">
                             <input class="form-check-input" type="radio" name="payment_method" value="bkash" id="bkash" required>
                             <label class="form-check-label fw-semibold text-danger" for="bkash">bKash</label>

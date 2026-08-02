@@ -1,8 +1,8 @@
 # Sordar Agro — Online Aquarium Marketplace
 
 Sordar Agro is an online marketplace for aquarium hobbyists to buy fish (sold in pairs),
-aquatic plants, fish food, and equipment, with seller and admin workspaces, a simulated
-payment/courier flow, care guides, and a community knowledge board.
+aquatic plants, fish food, and equipment, with seller and admin workspaces, a bKash/Nagad
+payment flow, simulated courier tracking, care guides, and a community knowledge board.
 
 > This is a runnable Laravel source tree, not a pre-built binary. You run `composer install`
 > and the migrations/seeders locally as described below.
@@ -33,12 +33,17 @@ payment/courier flow, care guides, and a community knowledge board.
 - **Fish are sold as pairs**: one unit of stock = 2 fish. Fish products have three size
   variants (small / medium / large), each with its own price, stock, and description.
 - **Non-fish products** (plants, food, equipment) use a single `standard` variant.
-- **Stock is decremented only after a successful (simulated) payment.**
+- **Stock is decremented only after a successful payment.**
 - **Restock notifications**: when an admin/seller increases stock on an out-of-stock
   product, everyone who wishlisted it receives a "back in stock" notification. With
   `MAIL_MAILER=log`, these are written to `storage/logs/laravel.log` (no SMTP needed).
-- **Payments (bKash / Nagad) and couriers (Pathao / Steadfast) are simulated** for the
-  academic scope — a button stands in for the real provider callback.
+- **Payments are confirmed via customer-submitted Transaction ID** — the customer sends
+  money through their bKash/Nagad app and enters the resulting TrxID, which the system
+  validates for uniqueness and confirms the order against. This is not a live gateway API
+  integration, so payments are not automatically verified against bKash/Nagad's systems.
+- **Couriers (Pathao / Steadfast) are simulated** for the academic scope — a courier is
+  assigned and a tracking code generated without a real courier API integration.
+- **Live search suggestions** appear in the navbar as the customer types a product name.
 
 ---
 
@@ -76,6 +81,7 @@ Then open <http://127.0.0.1:8000>.
 ### Database configuration (`.env`)
 
 **MySQL (default):** create a database, then set:
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -84,6 +90,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 
 **SQLite (quickest for testing):**
+
 ```bash
 touch database/database.sqlite
 php artisan migrate --seed
@@ -110,10 +117,11 @@ approval queue, and three published care guides.
 ## Feature walkthrough (suggested demo path)
 
 1. **Browse & filter** the shop (`/products`) — try the category, price, tank-size,
-   temperament, and availability filters, plus keyword search.
+   temperament, and availability filters, plus live search suggestions as you type.
 2. **Register** a customer, open a fish product, switch sizes, add a pair to the cart.
-3. **Checkout** → choose bKash/Nagad → **simulate a successful payment**. Watch stock drop
-   and the order appear under *My Orders* with tracking.
+3. **Checkout** → choose bKash or Nagad → you'll land on a payment page showing the
+   payment number and a QR code. Send the amount via your bKash/Nagad app, then submit
+   the resulting Transaction ID to confirm the order and watch stock drop.
 4. Log in as **admin** → *Inventory* → increase stock on an out-of-stock product to trigger
    a restock email (check `storage/logs/laravel.log`).
 5. Log in as the **seller** → add a product → log back in as **admin** → *Product Approvals*
@@ -131,9 +139,9 @@ php artisan test
 ```
 
 A PHPUnit test suite is included (`tests/Feature`, `tests/Unit`), covering authentication and
-role-based redirects, cart/checkout/payment flows (including stock-safety edge cases), and
-authorization boundaries. Tests run against an in-memory SQLite database (configured in
-`phpunit.xml`).
+role-based redirects, cart/checkout/payment flows (including stock-safety and duplicate
+Transaction ID edge cases), and authorization boundaries. Tests run against an in-memory
+SQLite database (configured in `phpunit.xml`).
 
 ---
 
@@ -151,6 +159,7 @@ factories/ User & Product factories
 resources/views/ Blade views (layouts, partials, storefront, dashboards)
 routes/web.php All named routes, grouped by role/middleware
 public/css/app.css Ocean/aquarium theme
+
 ---
 
 *Developed as part of the CSE412 (Software Engineering) course.*
