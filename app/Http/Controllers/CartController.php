@@ -57,6 +57,12 @@ class CartController extends Controller
         $cart->quantity = min($data['quantity'], $cart->variant->stock);
         $cart->save();
 
+        // The +/- stepper calls this via fetch() and expects JSON, while the
+        // old form-based flow still expects a redirect back to the cart page.
+        if ($request->wantsJson()) {
+            return response()->json(['quantity' => $cart->quantity]);
+        }
+
         return back()->with('success', 'Cart updated.');
     }
 

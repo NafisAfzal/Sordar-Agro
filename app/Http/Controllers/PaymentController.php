@@ -7,12 +7,13 @@ use App\Models\Order;
 use App\Services\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 /**
- * SIMULATED bKash / Nagad gateway. A real integration needs merchant
- * credentials; here a button stands in for the provider callback so the full
- * order lifecycle can be demonstrated end to end.
+ * Payment confirmation flow. The customer sends money manually via
+ * bKash/Nagad "Send Money" and submits the resulting Transaction ID here.
+ * There is no live gateway API integration — this records what the
+ * customer reports and confirms the order.
  */
 class PaymentController extends Controller
 {
@@ -20,7 +21,6 @@ class PaymentController extends Controller
     {
         $this->authorizeOwner($order);
 
-        // Already-paid orders skip the gateway.
         if ($order->payment_status === 'paid') {
             return redirect()->route('orders.show', $order);
         }
@@ -31,26 +31,27 @@ class PaymentController extends Controller
     public function process(Request $request, Order $order, InventoryService $inventory)
     {
         $this->authorizeOwner($order);
-        $request->validate(['outcome' => ['required', 'in:success,failure']]);
 
         if ($order->payment_status === 'paid') {
             return redirect()->route('orders.show', $order);
         }
 
-        // Eager-load items + their variants/products once (avoids N+1 in the
-        // loops below).
+        // A TrxID may only be used once across all orders.
+        $data = $request->validate([
+            'transaction_id' => [
+                'required', 'string', 'min:6', 'max:50',
+                Rule::unique('orders', 'transaction_id')->ignore($order->id),
+            ],
+        ], [
+            'transaction_id.required' => 'Please enter the Transaction ID from your confirmation message.',
+            'transaction_id.min'      => 'That Transaction ID looks too short — please check your SMS.',
+            'transaction_id.unique'   => 'This Transaction ID has already been used for another order.',
+        ]);
+
+        // Eager-load once to avoid N+1 in the loops below.
         $order->loadMissing('items.variant.product');
 
-        // Simulated failure path — order stays placed, customer can retry.
-        if ($request->outcome === 'failure') {
-            $order->update(['payment_status' => 'failed']);
-            return redirect()->route('payment.show', $order)
-                ->with('error', 'Payment failed. You can try again.');
-        }
-
-        // Stock can change between checkout and payment (another buyer may have
-        // bought the last units). Re-validate BEFORE taking payment so we never
-        // oversell or drive a variant's stock negative.
+        // Stock can change between checkout and payment — re-check before accepting.
         foreach ($order->items as $item) {
             if (! $item->variant || $item->quantity > $item->variant->stock) {
                 $name = $item->product_name.' ('.$item->variant_size.')';
@@ -59,21 +60,17 @@ class PaymentController extends Controller
             }
         }
 
-        // Success path: mark paid, decrement stock, clear the cart — all atomic.
-        // A lock on each variant row prevents two concurrent payments from
-        // reading the same stock and both decrementing it.
         try {
-            DB::transaction(function () use ($order) {
+            DB::transaction(function () use ($order, $data) {
                 $order->update([
                     'payment_status' => 'paid',
-                    'transaction_id' => strtoupper($order->payment_method).Str::random(10),
+                    'transaction_id' => strtoupper(trim($data['transaction_id'])),
                 ]);
 
                 foreach ($order->items as $item) {
+                    // Row lock prevents two concurrent payments overselling.
                     $variant = $item->variant()->lockForUpdate()->first();
                     if (! $variant || $variant->stock < $item->quantity) {
-                        // Stock vanished after our pre-check — roll the whole
-                        // transaction back rather than overselling.
                         throw new \RuntimeException('insufficient_stock');
                     }
                     $variant->decrement('stock', $item->quantity);
@@ -83,10 +80,9 @@ class PaymentController extends Controller
             });
         } catch (\RuntimeException $e) {
             return redirect()->route('payment.show', $order)
-                ->with('error', 'Some items just sold out while we processed your payment. Your card was not charged — please review your cart and try again.');
+                ->with('error', 'Some items sold out while we processed your payment. Please contact support with your Transaction ID.');
         }
 
-        // If anything sold out, reset its wishlist notification flags.
         foreach ($order->items as $item) {
             if ($item->variant) {
                 $inventory->resetNotificationsIfDepleted($item->variant->product);
@@ -94,7 +90,7 @@ class PaymentController extends Controller
         }
 
         return redirect()->route('orders.show', $order)
-            ->with('success', 'Payment successful — your order is confirmed!');
+            ->with('success', 'Thank you! Your payment details have been submitted and your order is confirmed.');
     }
 
     private function authorizeOwner(Order $order): void

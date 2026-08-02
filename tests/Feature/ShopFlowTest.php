@@ -56,13 +56,14 @@ class ShopFlowTest extends TestCase
 
         $order = Order::where('user_id', $customer->id)->latest()->firstOrFail();
 
-        // Simulate a successful payment.
-        $this->actingAs($customer)->post("/payment/{$order->id}", ['outcome' => 'success']);
+        // Simulate the customer submitting their bKash/Nagad Transaction ID.
+        $this->actingAs($customer)->post("/payment/{$order->id}", ['transaction_id' => 'TRX123456789']);
 
         $order->refresh();
         $variant->refresh();
 
         $this->assertSame('paid', $order->payment_status);
+        $this->assertSame('TRX123456789', $order->transaction_id);
         $this->assertSame(3, $variant->stock);              // 5 - 2
         $this->assertSame(0, Cart::where('user_id', $customer->id)->count());
     }
@@ -88,12 +89,46 @@ class ShopFlowTest extends TestCase
         // Simulate stock being depleted by someone else before payment clears.
         $variant->update(['stock' => 1]);
 
-        $this->actingAs($customer)->post("/payment/{$order->id}", ['outcome' => 'success']);
+        $this->actingAs($customer)->post("/payment/{$order->id}", ['transaction_id' => 'TRX987654321']);
 
         $order->refresh();
         $variant->refresh();
 
         $this->assertNotSame('paid', $order->payment_status); // payment refused
         $this->assertSame(1, $variant->stock);                // stock untouched, not negative
+    }
+
+    public function test_duplicate_transaction_id_is_rejected(): void
+    {
+        // Two different customers must not be able to submit the same TrxID.
+        $alice = User::factory()->create();
+        $bob = User::factory()->create();
+        $product = Product::factory()->withVariant(stock: 10, price: 100)->create();
+        $variant = $product->variants()->first();
+
+        // Alice pays successfully first.
+        $this->actingAs($alice)->post("/cart/{$variant->id}", ['quantity' => 1]);
+        $this->actingAs($alice)->post('/checkout', [
+            'shipping_name' => 'Alice',
+            'shipping_phone' => '01700000000',
+            'shipping_address' => 'Dhaka',
+            'payment_method' => 'bkash',
+        ]);
+        $aliceOrder = Order::where('user_id', $alice->id)->latest()->firstOrFail();
+        $this->actingAs($alice)->post("/payment/{$aliceOrder->id}", ['transaction_id' => 'TRXSHARED001']);
+
+        // Bob tries to reuse the same Transaction ID.
+        $this->actingAs($bob)->post("/cart/{$variant->id}", ['quantity' => 1]);
+        $this->actingAs($bob)->post('/checkout', [
+            'shipping_name' => 'Bob',
+            'shipping_phone' => '01700000001',
+            'shipping_address' => 'Dhaka',
+            'payment_method' => 'nagad',
+        ]);
+        $bobOrder = Order::where('user_id', $bob->id)->latest()->firstOrFail();
+        $this->actingAs($bob)->post("/payment/{$bobOrder->id}", ['transaction_id' => 'TRXSHARED001']);
+
+        $bobOrder->refresh();
+        $this->assertNotSame('paid', $bobOrder->payment_status);
     }
 }

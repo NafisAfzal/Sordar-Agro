@@ -22,5 +22,7 @@ return [
     ],
 
     // Custom application settings.
-    'whatsapp_number' => env('WHATSAPP_NUMBER', '8801700000000'),
-];
+    
+    'whatsapp_number' => env('WHATSAPP_NUMBER', '8801309985363'),
+    'payment_number' => env('PAYMENT_NUMBER', '01309985363'),
+    ];
