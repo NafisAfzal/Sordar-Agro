@@ -41,3 +41,6 @@ body {
 
 .size-pill { cursor: pointer; }
 .size-pill.active { background: var(--sa-teal); color: #fff; border-color: var(--sa-teal); }
+/* Clickable dashboard stat cards */
+.dashboard-card-clickable { transition: transform .15s ease, box-shadow .15s ease; cursor: pointer; }
+.dashboard-card-clickable:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(7,59,76,.14); }
