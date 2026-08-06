@@ -4,7 +4,12 @@
     <h3 class="mb-4"><i class="bi bi-bag"></i> My orders</h3>
 
     @if ($orders->isEmpty())
-        <div class="alert alert-info">You haven't placed any orders yet.</div>
+        <div class="text-center py-5">
+    <i class="bi bi-bag text-muted" style="font-size:3rem;"></i>
+    <h5 class="mt-3">No orders yet</h5>
+    <p class="text-muted">When you place an order, it will appear here with tracking details.</p>
+    <a href="{{ route('products.index') }}" class="btn btn-sa">Start shopping</a>
+</div>
     @else
         <div class="card border-0 shadow-sm">
             <div class="table-responsive">
