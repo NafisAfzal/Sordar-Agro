@@ -73,7 +73,8 @@
                     @error('transaction_id')
                         <div class="text-danger small mb-2">{{ $message }}</div>
                     @enderror
-                    <p class="text-muted small">
+                    <p class="small fw-semibold p-2 rounded" style="background-color:#fff3cd; color:#664d03; border:1px solid #ffe69c;">
+                        <i class="bi bi-exclamation-circle"></i>
                         Enter the exact TrxID from your {{ $brand }} confirmation SMS. Your order is confirmed once submitted
                         and verified by our team.
                     </p>

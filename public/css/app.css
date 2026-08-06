@@ -28,6 +28,39 @@ body {
     color: #fff !important;
 }
 
+/* Payment method selector — entire box is clickable, brand colours on select */
+.payment-option {
+    display: block;
+    position: relative;
+    border: 2px solid #dee2e6;
+    border-radius: .6rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+.payment-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.payment-option-body {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    color: #495057;
+}
+.payment-option-bkash .payment-option-body span.fw-bold { color: #E2136E; }
+.payment-option-nagad .payment-option-body span.fw-bold { color: #F7A623; }
+
+.payment-option-bkash:has(input:checked) {
+    border-color: #E2136E;
+    background-color: #fdeef4;
+}
+.payment-option-nagad:has(input:checked) {
+    border-color: #F7A623;
+    background-color: #fef6e7;
+}
+
 .navbar-sa .navbar-brand {
     font-size: 1.6rem;
 }
