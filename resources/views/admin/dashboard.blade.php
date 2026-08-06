@@ -4,23 +4,32 @@
 @section('content')
     <h3 class="mb-4">Admin overview</h3>
 
-    <div class="row g-3 mb-4">
-        @foreach ([
-            ['Customers', $stats['customers'], 'people', 'primary'],
-            ['Sellers', $stats['sellers'], 'shop', 'info'],
-            ['Products', $stats['products'], 'box-seam', 'secondary'],
-            ['Pending approvals', $stats['pending_products'], 'hourglass-split', 'warning'],
-            ['Orders', $stats['orders'], 'truck', 'success'],
-            ['Revenue (paid)', '৳'.number_format($stats['revenue'], 2), 'cash-stack', 'success'],
-        ] as [$label, $value, $icon, $color])
+       <div class="row g-3 mb-4">
+        @php
+            $cards = [
+                ['Customers', $stats['customers'], 'people', 'primary', null],
+                ['Sellers', $stats['sellers'], 'shop', 'info', null],
+                ['Products', $stats['products'], 'box-seam', 'secondary', null],
+                ['Pending approvals', $stats['pending_products'], 'hourglass-split', 'warning', route('admin.products.index', ['status' => 'pending'])],
+                ['Orders', $stats['orders'], 'truck', 'success', route('admin.orders.index')],
+                ['Revenue (paid)', '৳'.number_format($stats['revenue'], 2), 'cash-stack', 'success', null],
+            ];
+        @endphp
+        @foreach ($cards as [$label, $value, $icon, $color, $link])
             <div class="col-6 col-md-4 col-lg-2">
-                <div class="card border-0 shadow-sm h-100">
+                @if ($link)
+                    <a href="{{ $link }}" class="text-decoration-none">
+                @endif
+                <div class="card border-0 shadow-sm h-100 {{ $link ? 'dashboard-card-clickable' : '' }}">
                     <div class="card-body">
                         <div class="text-{{ $color }} fs-4"><i class="bi bi-{{ $icon }}"></i></div>
                         <div class="fs-5 fw-bold">{{ $value }}</div>
                         <div class="text-muted small">{{ $label }}</div>
                     </div>
                 </div>
+                @if ($link)
+                    </a>
+                @endif
             </div>
         @endforeach
     </div>

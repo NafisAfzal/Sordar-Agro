@@ -34,12 +34,16 @@
 
     <div class="col-md-4">
         <div class="mb-3">
-            <label class="form-label">Thumbnail image</label>
-            <input type="file" name="thumbnail" class="form-control" accept="image/*">
-            @if ($product && $product->thumbnail)
-                <img src="{{ asset('storage/'.$product->thumbnail) }}" class="img-fluid rounded mt-2" alt="">
-            @endif
-        </div>
+    <label class="form-label">Thumbnail image</label>
+    <input type="file" name="thumbnail" id="thumbnailInput" class="form-control" accept="image/*">
+    <small class="text-muted">JPG, PNG, or WEBP. Max 2MB.</small>
+    <div class="mt-2">
+        <img id="thumbnailPreview"
+             src="{{ $product && $product->thumbnail ? asset('storage/'.$product->thumbnail) : '' }}"
+             class="img-fluid rounded {{ $product && $product->thumbnail ? '' : 'd-none' }}"
+             style="max-height:180px;" alt="Thumbnail preview">
+    </div>
+</div>
         <div class="form-check form-switch mb-3">
             <input class="form-check-input" type="checkbox" name="is_fish" value="1" id="isFish" @checked($isFish)>
             <label class="form-check-label" for="isFish">This is a fish (sold in pairs, 3 sizes)</label>
@@ -104,6 +108,32 @@
 </div>
 
 @push('scripts')
+<script>
+    // Live thumbnail preview before upload.
+    (function () {
+        const input = document.getElementById('thumbnailInput');
+        const preview = document.getElementById('thumbnailPreview');
+        if (!input || !preview) return;
+
+        input.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Image is too large. Please choose a file under 2MB.');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        });
+    })();
+</script>
 <script>
     // Toggle which variant block submits. Disabled inputs are not posted,
     // so only the active block's fields reach the controller.
