@@ -82,7 +82,12 @@
                             @csrf
                             <div>
                                 <label class="form-label small">Quantity</label>
-                                <input type="number" name="quantity" value="1" min="1" max="{{ $default->stock }}" class="form-control" style="width:90px;" id="qtyInput">
+                                <div class="input-group input-group-sm qty-stepper" style="width:130px;">
+                                    <button type="button" class="btn btn-outline-secondary" id="qtyMinus">−</button>
+                                    <input type="number" name="quantity" value="1" min="1" max="{{ $default->stock }}"
+                                           class="form-control text-center" id="qtyInput" readonly>
+                                    <button type="button" class="btn btn-outline-secondary" id="qtyPlus">+</button>
+                                </div>
                             </div>
                             <button class="btn btn-sa"><i class="bi bi-cart-plus"></i> Add to cart</button>
                         </form>
@@ -142,6 +147,23 @@
                 if (addForm)    addForm.setAttribute('action', baseAction + pill.dataset.id);
             });
         });
+
+        // +/- stepper buttons for quantity.
+        const qtyMinus = document.getElementById('qtyMinus');
+        const qtyPlus  = document.getElementById('qtyPlus');
+        if (qtyMinus && qtyInput) {
+            qtyMinus.addEventListener('click', () => {
+                let val = parseInt(qtyInput.value, 10);
+                if (val > 1) qtyInput.value = val - 1;
+            });
+        }
+        if (qtyPlus && qtyInput) {
+            qtyPlus.addEventListener('click', () => {
+                let val = parseInt(qtyInput.value, 10);
+                const max = parseInt(qtyInput.max, 10);
+                if (val < max) qtyInput.value = val + 1;
+            });
+        }
     })();
 </script>
 @endpush
