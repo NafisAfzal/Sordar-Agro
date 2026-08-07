@@ -22,7 +22,7 @@
             @yield('content')
         </div>
     </div>
-    <p class="text-center text-muted small mt-3">CSE412 — Group 05 · Aquarium Marketplace</p>
+    <p class="text-center text-muted small mt-3">Aquarium Marketplace</p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
