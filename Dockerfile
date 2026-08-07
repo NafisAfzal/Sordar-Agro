@@ -14,4 +14,4 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 
 EXPOSE 8080
-CMD php artisan migrate --seed --force && php scripts/rotate-db-password.php && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+CMD php artisan migrate --seed --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
