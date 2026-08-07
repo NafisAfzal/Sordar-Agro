@@ -55,7 +55,7 @@
             @if ($variants->count() > 1)
                 {{-- Size selector --}}
                 <h6 class="fw-bold">{{ $product->is_fish ? 'Choose a size' : 'Option' }}</h6>
-                <div class="mb-2" id="sizePills">
+                <div class="mb-2" id="sizePills" data-is-fish="{{ $product->is_fish ? '1' : '0' }}">
                     @foreach ($variants as $v)
                         <button type="button"
                                 class="btn btn-outline-secondary size-pill m-1 {{ $v->id === $default->id ? 'active' : '' }} {{ $v->stock <= 0 ? 'disabled' : '' }}"
@@ -134,7 +134,8 @@
         const sizeDesc   = document.getElementById('sizeDesc');
         const addForm    = document.getElementById('addForm');
         const qtyInput   = document.getElementById('qtyInput');
-        const unit = {{ $product->is_fish ? "'pairs'" : "'units'" }};
+        const isFish = document.getElementById('sizePills')?.dataset.isFish === '1';
+        const unit = isFish ? 'pairs' : 'units';
         const baseAction = "{{ url('/cart') }}/";
 
         pills.forEach(pill => {
