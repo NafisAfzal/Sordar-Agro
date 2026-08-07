@@ -20,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
         // Bootstrap 5 friendly pagination markup.
         Paginator::useBootstrapFive();
 
+        if ($this->app->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Share lightweight cart/wishlist counts with every view so the
         // navbar badges stay accurate without each controller passing them.
         View::composer('*', function ($view) {
