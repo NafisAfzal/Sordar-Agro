@@ -14,12 +14,12 @@ class HomeController extends Controller
             ->with('variants', 'category')
             ->where('is_featured', true)
             ->latest()
-            ->take(8)
+            ->take(4)
             ->get();
 
         // Fallback so a fresh install still shows products on the homepage.
         if ($featured->isEmpty()) {
-            $featured = Product::approved()->with('variants', 'category')->latest()->take(8)->get();
+            $featured = Product::approved()->with('variants', 'category')->latest()->take(4)->get();
         }
 
         $categories = Category::whereNull('parent_id')->withCount('products')->get();
