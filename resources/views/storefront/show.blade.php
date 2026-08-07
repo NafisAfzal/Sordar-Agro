@@ -52,23 +52,25 @@
                 <a href="{{ route('login') }}" class="btn btn-outline-danger">Log in to wishlist</a>
             @endauth
         @else
-            {{-- Size selector --}}
-            <h6 class="fw-bold">{{ $product->is_fish ? 'Choose a size' : 'Option' }}</h6>
-            <div class="mb-2" id="sizePills">
-                @foreach ($variants as $v)
-                    <button type="button"
-                            class="btn btn-outline-secondary size-pill m-1 {{ $v->id === $default->id ? 'active' : '' }} {{ $v->stock <= 0 ? 'disabled' : '' }}"
-                            data-id="{{ $v->id }}"
-                            data-price="{{ number_format($v->price, 2) }}"
-                            data-stock="{{ $v->stock }}"
-                            data-desc="{{ e($v->size_description) }}"
-                            {{ $v->stock <= 0 ? 'disabled' : '' }}>
-                        {{ $v->label }}
-                    </button>
-                @endforeach
-            </div>
+            @if ($variants->count() > 1)
+                {{-- Size selector --}}
+                <h6 class="fw-bold">{{ $product->is_fish ? 'Choose a size' : 'Option' }}</h6>
+                <div class="mb-2" id="sizePills">
+                    @foreach ($variants as $v)
+                        <button type="button"
+                                class="btn btn-outline-secondary size-pill m-1 {{ $v->id === $default->id ? 'active' : '' }} {{ $v->stock <= 0 ? 'disabled' : '' }}"
+                                data-id="{{ $v->id }}"
+                                data-price="{{ number_format($v->price, 2) }}"
+                                data-stock="{{ $v->stock }}"
+                                data-desc="{{ e($v->size_description) }}"
+                                {{ $v->stock <= 0 ? 'disabled' : '' }}>
+                            {{ $v->label }}
+                        </button>
+                    @endforeach
+                </div>
 
-            <p class="text-muted small" id="sizeDesc">{{ $default->size_description }}</p>
+                <p class="text-muted small" id="sizeDesc">{{ $default->size_description }}</p>
+            @endif
 
             <div class="d-flex align-items-center gap-3 mb-3">
                 <h3 class="text-sa mb-0">৳<span id="priceLabel">{{ number_format($default->price, 2) }}</span></h3>
