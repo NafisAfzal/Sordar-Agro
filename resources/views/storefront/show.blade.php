@@ -19,9 +19,9 @@
 <div class="row g-4">
     <div class="col-md-5">
         @if ($product->thumbnail)
-            <img src="{{ asset('storage/'.$product->thumbnail) }}" class="img-fluid rounded shadow-sm" alt="{{ $product->name }}">
+            <img src="{{ asset('storage/'.$product->thumbnail) }}" class="img-fluid rounded shadow-sm" alt="{{ $product->name }}" loading="lazy">
         @else
-            <div class="thumb-placeholder rounded" style="height:340px;"><i class="bi bi-water"></i></div>
+            <div class="thumb-placeholder rounded" style="height:340px;"><i class="bi {{ $product->category->icon_class ?? 'bi-water' }}"></i></div>
         @endif
     </div>
 

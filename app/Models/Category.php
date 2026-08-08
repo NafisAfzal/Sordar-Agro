@@ -18,4 +18,16 @@ class Category extends Model
     public function children(): HasMany { return $this->hasMany(Category::class, 'parent_id'); }
 
     public function getRouteKeyName(): string { return 'slug'; }
+
+    /** Bootstrap Icons class used for this category's thumbnail placeholders and cards. */
+    public function getIconClassAttribute(): string
+    {
+        return match ($this->slug) {
+            'fish' => 'bi-water',
+            'aquatic-plants' => 'bi-flower1',
+            'fish-food' => 'bi-box-seam',
+            'equipment' => 'bi-boxes',
+            default => 'bi-water',
+        };
+    }
 }

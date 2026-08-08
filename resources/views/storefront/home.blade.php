@@ -36,7 +36,7 @@
     </div>
     <div class="row g-3 mb-5">
         @forelse ($featured as $product)
-            <div class="col-6 col-md-3">@include('partials.product-card')</div>
+            <div class="col-6 col-md-3">@include('partials.product-card', ['loading' => $loop->index < 3 ? 'eager' : 'lazy'])</div>
         @empty
             <p class="text-muted">No products yet. Run <code>php artisan migrate --seed</code>.</p>
         @endforelse

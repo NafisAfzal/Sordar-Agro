@@ -12,6 +12,7 @@ RUN mkdir -p storage/framework/{cache,cache/data,sessions,testing,views} storage
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --optimize-autoloader --no-dev --no-interaction
+RUN php artisan storage:link
 
 EXPOSE 8080
 CMD php artisan migrate --seed --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
