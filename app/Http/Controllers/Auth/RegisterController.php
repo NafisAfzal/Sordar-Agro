@@ -36,6 +36,12 @@ class RegisterController extends Controller
             'role'     => 'customer',          // forced — never trust input
         ]);
 
+        try {
+            event(new \Illuminate\Auth\Events\Registered($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Verification email failed to send: '.$e->getMessage());
+        }
+
         Auth::login($user);
         $request->session()->regenerate();
 

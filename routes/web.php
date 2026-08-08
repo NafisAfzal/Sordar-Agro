@@ -78,6 +78,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/change-password', [PasswordController::class, 'showChange'])->name('password.change');
     Route::post('/change-password', [PasswordController::class, 'updateChange'])->name('password.change.update');
 
+    // Email verification
+    Route::get('/email/verify', [App\Http\Controllers\Auth\VerificationController::class, 'notice'])
+        ->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Auth\VerificationController::class, 'verify'])
+        ->middleware(['signed'])
+        ->name('verification.verify');
+
+    Route::post('/email/verification-notification', [App\Http\Controllers\Auth\VerificationController::class, 'resend'])
+        ->middleware(['throttle:6,1'])
+        ->name('verification.send');
+
     /*
     | Shopping routes — customers AND sellers (sellers keep buyer powers).
     | password.changed forces temp-password sellers to update first.

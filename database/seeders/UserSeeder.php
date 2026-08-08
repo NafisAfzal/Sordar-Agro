@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
                 'password'  => 'password',     // hashed via model cast
                 'role'      => 'admin',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
 
@@ -33,6 +34,7 @@ class UserSeeder extends Seeder
                 'must_change_password' => false,
                 'is_active'            => true,
                 'created_by'           => $admin?->id,
+                'email_verified_at'    => now(),
             ]
         );
 
@@ -45,6 +47,7 @@ class UserSeeder extends Seeder
                 'password'  => 'password',
                 'role'      => 'customer',
                 'is_active' => true,
+                'email_verified_at' => now(),
             ]
         );
     }
