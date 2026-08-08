@@ -29,3 +29,4 @@
         <button class="btn btn-sa w-100">Register</button>
     </form>
     <p class="text-center mt-3 mb-0 small">Already have an account? <a href="{{ route('login') }}">Log in</a></p>
+@endsection

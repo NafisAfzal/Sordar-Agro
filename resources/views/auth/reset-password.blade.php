@@ -19,3 +19,4 @@
         </div>
         <button class="btn btn-sa w-100">Reset password</button>
     </form>
+@endsection

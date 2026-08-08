@@ -10,14 +10,14 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-<div class="container" style="max-width: 460px;">
+<div class="container" style="max-width: 600px;">
     <div class="text-center my-4">
         <a href="{{ route('home') }}" class="text-decoration-none text-sa brand-mark fs-3">
             <i class="bi bi-water"></i> SORDAR AGRO
         </a>
     </div>
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
+    <div class="card shadow-sm auth-card">
+        <div class="card-body p-4 p-md-5">
             @include('partials.flash')
             @yield('content')
         </div>

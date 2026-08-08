@@ -25,3 +25,4 @@
         </div>
         <button class="btn btn-sa w-100">Update password</button>
     </form>
+@endsection

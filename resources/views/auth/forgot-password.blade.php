@@ -13,3 +13,4 @@
         <button class="btn btn-sa w-100">Send reset link</button>
     </form>
     <p class="text-center mt-3 mb-0 small"><a href="{{ route('login') }}">Back to login</a></p>
+@endsection

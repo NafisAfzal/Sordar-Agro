@@ -24,3 +24,4 @@
     <p class="text-center mt-3 mb-0 small">
         New here? <a href="{{ route('register') }}">Create a customer account</a>
     </p>
+@endsection

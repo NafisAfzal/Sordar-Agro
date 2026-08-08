@@ -276,3 +276,25 @@ body {
     transform: translateY(-3px);
     box-shadow: 0 8px 18px rgba(7,59,76,.14);
 }
+
+/* ===========================
+   Auth Cards (login/register)
+=========================== */
+
+.auth-card {
+    border: 1px solid var(--sa-foam);
+}
+
+/* ===========================
+   Form Controls
+=========================== */
+
+.form-control {
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+
+.form-control:focus {
+    border-color: var(--sa-teal);
+    box-shadow: 0 0 0 .2rem rgba(10, 126, 164, .18);
+}
