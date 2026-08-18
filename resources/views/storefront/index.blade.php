@@ -3,36 +3,15 @@
 @section('content')
     <div class="row">
         {{-- Filters sidebar --}}
-			<div class="d-lg-none mb-3">
-    <button class="btn btn-outline-secondary w-100" type="button"
-            data-bs-toggle="collapse" data-bs-target="#mobileFilters">
-        <i class="bi bi-funnel"></i> Filters
-    </button>
-</div>
+        <div class="d-lg-none mb-3">
+            <button class="btn btn-outline-secondary w-100" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#mobileFilters">
+                <i class="bi bi-funnel"></i> Filters
+            </button>
+        </div>
 
-
-
-
-<div class="collapse d-lg-block" id="mobileFilters">
-<div class="d-lg-none mb-3">
-    <button class="btn btn-outline-secondary w-100" type="button"
-            data-bs-toggle="collapse" data-bs-target="#mobileFilters">
-        <i class="bi bi-funnel"></i> Filters
-    </button>
-</div>
-<div class="collapse d-lg-block" id="mobileFilters">
-       
-
-
-<div class="d-lg-none mb-3">
-    <button class="btn btn-outline-secondary w-100" type="button"
-            data-bs-toggle="collapse" data-bs-target="#mobileFilters">
-        <i class="bi bi-funnel"></i> Filters
-    </button>
-</div>
-<div class="collapse d-lg-block" id="mobileFilters">
-
- <div class="col-lg-3 mb-4">
+        <div class="collapse d-lg-block" id="mobileFilters">
+            <div class="col-lg-3 mb-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <h6 class="fw-bold mb-3"><i class="bi bi-funnel"></i> Filters</h6>
@@ -117,6 +96,7 @@
                 </div>
             </div>
         </div>
+        </div>
 
         {{-- Products grid --}}
         <div class="col-lg-9">
@@ -179,6 +159,4 @@
             <div class="mt-4">{{ $products->links() }}</div>
         </div>
     </div>
-</div>  {{-- mobileFilters er jonno --}}
-</div>  {{-- End of mobileFilters --}}
 @endsection

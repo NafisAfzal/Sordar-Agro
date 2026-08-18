@@ -35,10 +35,6 @@ body {
     letter-spacing: 1px;
 }
 
-.nav-search {
-    width: 260px;
-}
-
 .nav-search .form-control:focus,
 .nav-search .input-group-text {
     box-shadow: none;

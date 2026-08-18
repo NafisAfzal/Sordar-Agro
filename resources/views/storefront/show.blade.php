@@ -27,7 +27,7 @@
 
     <div class="col-md-7">
         <span class="badge bg-light text-sa mb-2">{{ $product->category->name ?? '' }}</span>
-        <h2>{{ $product->name }}</h2>
+        <h3>{{ $product->name }}</h3>
 
         @if ($product->is_fish)
             <p class="text-muted"><i class="bi bi-info-circle"></i> Fish are sold <strong>as a pair</strong> — each unit = 2 fish.</p>

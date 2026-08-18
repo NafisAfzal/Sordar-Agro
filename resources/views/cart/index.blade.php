@@ -32,7 +32,7 @@
                                         </td>
                                         <td>৳{{ number_format($item->variant->price, 2) }}</td>
                                         <td>
-                                            <div class="input-group input-group-sm qty-stepper" style="width:120px;">
+                                            <div class="input-group input-group-sm qty-stepper" style="width:130px;">
                                                 <button type="button" class="btn btn-outline-secondary qty-minus" data-cart-id="{{ $item->id }}">−</button>
                                                 <input type="number" class="form-control text-center qty-input"
                                                        value="{{ $item->quantity }}" min="1" max="{{ $item->variant->stock }}"

@@ -14,7 +14,7 @@
             <div class="card-body p-4">
 
                 <div class="text-center mb-4">
-                    <div class="display-6 fw-bold text-{{ $colour }}">{{ $brand }}</div>
+                    <h3 class="display-6 fw-bold text-{{ $colour }}">{{ $brand }}</h3>
                     <p class="text-muted mb-0">Complete your payment to confirm the order</p>
                 </div>
 
@@ -36,7 +36,7 @@
                                  alt="QR code containing the payment number"
                                  class="img-fluid rounded border p-2 bg-white" style="max-width:200px;">
                         @endif
-                        <p class="small fw-semibold mt-2 mb-0" style="color:#0a7ea4;">Scan with your phone camera to copy the number</p>
+                        <p class="small fw-semibold mt-2 mb-0 text-sa">Scan with your phone camera to copy the number</p>
                     </div>
 
                     <div class="col-md-7">
@@ -73,11 +73,11 @@
                     @error('transaction_id')
                         <div class="text-danger small mb-2">{{ $message }}</div>
                     @enderror
-                    <p class="small fw-semibold p-2 rounded" style="background-color:#fff3cd; color:#664d03; border:1px solid #ffe69c;">
+                    <div class="alert alert-warning small fw-semibold mb-2">
                         <i class="bi bi-exclamation-circle"></i>
                         Enter the exact TrxID from your {{ $brand }} confirmation SMS. Your order is confirmed once submitted
                         and verified by our team.
-                    </p>
+                    </div>
                     <button class="btn btn-sa btn-lg w-100">
                         <i class="bi bi-check-circle"></i> Submit payment details
                     </button>
