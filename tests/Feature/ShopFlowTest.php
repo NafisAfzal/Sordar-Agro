@@ -131,4 +131,26 @@ class ShopFlowTest extends TestCase
         $bobOrder->refresh();
         $this->assertNotSame('paid', $bobOrder->payment_status);
     }
+
+    public function test_min_price_filter_matches_starting_price_not_any_variant(): void
+    {
+        // Regression test: the shop's min_price filter must match a product's
+        // starting (cheapest-variant) price — the figure shown on its card —
+        // not just "any variant happens to be in range". A product with a
+        // cheap variant below the filter, even if it also has a pricier
+        // variant that would satisfy the bound, must not appear in the
+        // filtered results.
+        $cheapStart = Product::factory()->create();
+        $cheapStart->variants()->create(['size' => 'small', 'sku' => 'A1', 'price' => 180, 'stock' => 5]);
+        $cheapStart->variants()->create(['size' => 'large', 'sku' => 'A2', 'price' => 350, 'stock' => 5]);
+
+        $allAboveMin = Product::factory()->create();
+        $allAboveMin->variants()->create(['size' => 'small', 'sku' => 'B1', 'price' => 320, 'stock' => 5]);
+        $allAboveMin->variants()->create(['size' => 'large', 'sku' => 'B2', 'price' => 550, 'stock' => 5]);
+
+        $response = $this->get('/products?min_price=300');
+
+        $response->assertSee($allAboveMin->name);
+        $response->assertDontSee($cheapStart->name);
+    }
 }

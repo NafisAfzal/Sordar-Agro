@@ -36,14 +36,17 @@ class ProductController extends Controller
             $query->where('min_tank_size_litres', '<=', $tank);
         }
 
-        // Price-range filter against the cheapest variant.
+        // Price-range filter against the product's starting (cheapest-variant)
+        // price — the same figure shown on the product card. A product's
+        // starting price is >= min only if none of its variants are cheaper
+        // than min, and <= max only if at least one variant is at or below max.
         $min = $request->query('min_price');
         $max = $request->query('max_price');
-        if ($min !== null || $max !== null) {
-            $query->whereHas('variants', function ($q) use ($min, $max) {
-                if ($min !== null) $q->where('price', '>=', (float) $min);
-                if ($max !== null) $q->where('price', '<=', (float) $max);
-            });
+        if ($min !== null) {
+            $query->whereDoesntHave('variants', fn ($q) => $q->where('price', '<', (float) $min));
+        }
+        if ($max !== null) {
+            $query->whereHas('variants', fn ($q) => $q->where('price', '<=', (float) $max));
         }
 
         // Availability filter.

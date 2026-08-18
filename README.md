@@ -140,7 +140,7 @@ Run the full suite with:
 php artisan test
 ```
 
-As of this writing the suite has **33 tests (48 assertions)**, all passing, run against an
+As of this writing the suite has **34 tests (50 assertions)**, all passing, run against an
 in-memory SQLite database (configured in `phpunit.xml`). Six tests emit a harmless
 `BigNumber::of()` float-cast deprecation notice from a decimal-cast dependency — cosmetic,
 not a functional issue.
@@ -161,7 +161,7 @@ Full HTTP-request tests against the application, exercising routes, middleware, 
 - **`AuthTest`** — registration always creates a customer role, role-based post-login redirects (customer → home, admin → dashboard), suspended users are blocked from logging in.
 - **`AuthorizationTest`** — guests are redirected to login from the cart, a customer cannot view another customer's order, and role-gated routes (admin dashboard, seller workspace) reject customers.
 - **`BoundaryValueTest`** *(Sayed)* — see Boundary value testing below.
-- **`ShopFlowTest`** — out-of-stock variants can't be added to cart, in-stock ones can, a successful payment decrements stock and clears the cart, duplicate Transaction IDs are rejected, and **a stock-oversell regression test**: if stock drops below the ordered quantity between checkout and payment, payment is blocked rather than allowed to overdraw inventory.
+- **`ShopFlowTest`** — out-of-stock variants can't be added to cart, in-stock ones can, a successful payment decrements stock and clears the cart, duplicate Transaction IDs are rejected, **a stock-oversell regression test** (if stock drops below the ordered quantity between checkout and payment, payment is blocked rather than allowed to overdraw inventory), and **a min-price filter regression test** (a product must match the shop's price filter by its displayed starting price, not merely by having some variant in range — see Regression testing below).
 
 ### Regression testing
 
@@ -171,10 +171,14 @@ unit tests were all verified against a clean run before being committed or pushe
 
 Mostahid also maintains a manual regression checklist (`REGRESSION-CHECKLIST.md`) covering
 filter combinations and the core cart/checkout flow, run after any change to filters, cart, or
-checkout. **Its most recent run (2026-08-18) found one open issue**: the Category + minimum-price
-filter combination does not currently work correctly — logged as FAIL, not yet fixed. Everything
-else on that checklist (temperament+availability, search+category, tank-size+availability,
-price-min-greater-than-max, and the full register→cart→checkout→wishlist flow) passed.
+checkout. **Its run on 2026-08-18 caught a real bug**: the shop's minimum-price filter matched a
+product if *any* one of its variants was in range, rather than the product's displayed starting
+(cheapest-variant) price — so a product advertised well below the filtered minimum could still
+appear in the results. This has since been fixed in `ProductController::index()` (the filter now
+checks the cheapest variant, matching what the product card shows) and is covered by a new test,
+`ShopFlowTest::test_min_price_filter_matches_starting_price_not_any_variant`. Everything else on
+that checklist (temperament+availability, search+category, tank-size+availability, price-min-
+greater-than-max, and the full register→cart→checkout→wishlist flow) passed.
 
 ### Black-box / user testing
 
@@ -208,15 +212,12 @@ after this sprint's merge and all items passed.
   Brevo's HTTP API using the default sender address configured for this project — the sending
   domain is not yet a verified custom domain. This affects spam-folder placement/deliverability
   on some providers, not functionality — emails still send successfully.
-- **Known bug — filter combination**: combining the Category filter with a minimum price filter
-  on the shop page does not currently return correct results (see Regression testing above). Not
-  yet fixed as of this writing.
 - **Payment confirmation is manual, not gateway-integrated**: customers self-report a bKash/Nagad
   Transaction ID after sending money via their own app; the system checks it for uniqueness but
   does not call a live bKash/Nagad API to verify the transaction actually occurred.
 - **Courier tracking is simulated**: a courier and tracking code are assigned for demonstration
   purposes, without integrating a real Pathao/Steadfast API.
-- **Minor test noise**: 6 of the 33 tests emit a deprecation notice from a decimal-cast dependency
+- **Minor test noise**: 6 of the 34 tests emit a deprecation notice from a decimal-cast dependency
   (`BigNumber::of()` being passed a float). It doesn't affect correctness or pass/fail status, just
   a warning worth cleaning up eventually by casting to string first.
 
