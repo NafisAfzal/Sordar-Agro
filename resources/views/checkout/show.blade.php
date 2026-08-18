@@ -2,7 +2,14 @@
 @section('title', 'Checkout')
 
 @section('content')
-    <h3 class="mb-4"><i class="bi bi-bag-check"></i> Checkout</h3>
+    <h3 class="mb-3"><i class="bi bi-bag-check"></i> Checkout</h3>
+    <div class="d-flex align-items-center gap-2 mb-4 small">
+        <span class="text-muted"><i class="bi bi-check-circle-fill text-success"></i> Cart</span>
+        <span class="text-muted">→</span>
+        <span class="fw-bold text-sa"><i class="bi bi-circle-fill"></i> Shipping &amp; Payment</span>
+        <span class="text-muted">→</span>
+        <span class="text-muted">Confirmation</span>
+    </div>
 
     <form method="POST" action="{{ route('checkout.place') }}">
         @csrf
@@ -109,13 +116,22 @@
                             <span>৳{{ number_format($total, 2) }}</span>
                         </div>
 
-                        <button class="btn btn-sa w-100 mt-3">
-                            Place order &amp; pay
-                        </button>
+                        <button class="btn btn-sa w-100 mt-3" id="placeOrderBtn">Place order &amp; pay</button>
                     </div>
                 </div>
             </div>
 
         </div>
     </form>
+@push('scripts')
+<script>
+    document.querySelector('form')?.addEventListener('submit', function () {
+        const btn = document.getElementById('placeOrderBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Placing order...';
+        }
+    });
+</script>
+@endpush
 @endsection
