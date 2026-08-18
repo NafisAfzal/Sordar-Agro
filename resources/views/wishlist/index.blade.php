@@ -4,7 +4,12 @@
     <h3 class="mb-4"><i class="bi bi-heart"></i> Your wishlist</h3>
 
     @if ($items->isEmpty())
-        <div class="alert alert-info">Your wishlist is empty.</div>
+        <div class="text-center py-5">
+    <i class="bi bi-heart text-muted" style="font-size:3rem;"></i>
+    <h5 class="mt-3">Your wishlist is empty</h5>
+    <p class="text-muted">Save products you love and we'll tell you when they're back in stock.</p>
+    <a href="{{ route('products.index') }}" class="btn btn-sa">Browse products</a>
+</div>
     @else
         <div class="row g-3">
             @foreach ($items as $item)

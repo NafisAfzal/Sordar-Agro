@@ -166,8 +166,13 @@
                     <div class="col-6 col-md-4">@include('partials.product-card')</div>
                 @empty
                     <div class="col-12">
-                        <div class="alert alert-info">No products match your filters.</div>
-                    </div>
+    <div class="text-center py-5">
+        <i class="bi bi-search text-muted" style="font-size:3rem;"></i>
+        <h5 class="mt-3">No products match your filters</h5>
+        <p class="text-muted">Try removing a filter or searching for something different.</p>
+        <a href="{{ route('products.index') }}" class="btn btn-outline-secondary">Clear all filters</a>
+    </div>
+</div>
                 @endforelse
             </div>
 
