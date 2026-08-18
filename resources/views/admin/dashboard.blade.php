@@ -4,7 +4,7 @@
 @section('content')
     <h3 class="mb-4">Admin overview</h3>
 
-       <div class="row g-3 mb-4">
+       <div class="row g-3 mb-5">
         @php
             $cards = [
                 ['Customers', $stats['customers'], 'people', 'primary', null],
@@ -46,7 +46,10 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
-            <h6 class="fw-bold mb-3">Recent orders</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold mb-0">Recent orders</h6>
+    <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-secondary">View all orders</a>
+</div>
             @if ($recentOrders->isEmpty())
                 <p class="text-muted mb-0">No orders yet.</p>
             @else

@@ -9,9 +9,20 @@
                 @csrf
                 @include('seller.products._form', ['product' => null])
                 <hr>
-                <button class="btn btn-sa">Submit for approval</button>
+                <button class="btn btn-sa" id="submitProductBtn">Submit for approval</button>
                 <a href="{{ route('seller.products.index') }}" class="btn btn-link">Cancel</a>
             </form>
         </div>
     </div>
+@push('scripts')
+<script>
+    document.querySelector('form')?.addEventListener('submit', function () {
+        const btn = document.getElementById('submitProductBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
+        }
+    });
+</script>
+@endpush
 @endsection

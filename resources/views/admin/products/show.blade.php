@@ -38,6 +38,7 @@
                 <div class="collapse mt-3" id="rejectBox">
                     <form method="POST" action="{{ route('admin.products.reject', $product) }}">
                         @csrf @method('PATCH')
+<label class="form-label small fw-semibold">Why is this being rejected?</label>
                         <textarea name="admin_feedback" class="form-control mb-2" rows="3" placeholder="Reason / feedback for the seller" required></textarea>
                         <button class="btn btn-outline-danger btn-sm">Confirm rejection</button>
                     </form>
