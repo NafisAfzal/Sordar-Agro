@@ -7,6 +7,19 @@
         <a href="{{ route('seller.products.create') }}" class="btn btn-sa"><i class="bi bi-plus-lg"></i> Add product</a>
     </div>
 
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <div class="text-muted small">Total units sold (paid orders)</div>
+                <div class="fs-4 fw-bold">{{ $totalUnitsSold }}</div>
+            </div>
+            <div>
+                <div class="text-muted small">Total marketplace share you've paid</div>
+                <div class="fs-4 fw-bold">৳{{ number_format($totalShareEarned, 2) }}</div>
+            </div>
+        </div>
+    </div>
+
     @if ($products->isEmpty())
         <div class="alert alert-info">You haven't listed any products yet.</div>
     @else
@@ -14,16 +27,25 @@
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
                     <thead class="table-light">
-                        <tr><th>Name</th><th>Category</th><th>From</th><th>Stock</th><th>Profit Share</th><th>Status</th><th></th></tr>
+                        <tr><th>Name</th><th>Category</th><th>From</th><th>Stock</th><th>Marketplace Share</th><th>Shared to Marketplace</th><th>Status</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach ($products as $p)
+                            @php($unitsSold = $p->unitsSold())
                             <tr>
                                 <td class="fw-semibold">{{ $p->name }}</td>
                                 <td>{{ $p->category->name ?? '—' }}</td>
                                 <td>৳{{ number_format($p->starting_price, 2) }}</td>
                                 <td>{{ $p->total_stock }}</td>
                                 <td>৳{{ number_format($p->profit_share_amount, 2) }}</td>
+                                <td class="small">
+                                    @if ($unitsSold > 0)
+                                        {{ $unitsSold }} sold &times; ৳{{ number_format($p->profit_share_amount, 2) }}
+                                        = <strong>৳{{ number_format($p->marketplaceShareEarned(), 2) }}</strong>
+                                    @else
+                                        <span class="text-muted">No sales yet</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="badge bg-{{ ['pending'=>'warning','approved'=>'success','rejected'=>'danger'][$p->status] }}">{{ ucfirst($p->status) }}</span>
                                     @if ($p->status === 'rejected' && $p->rejection_reason_category)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Http\Request;
@@ -18,7 +19,18 @@ class ProductController extends Controller
             ->with('category', 'variants')
             ->latest()->paginate(10);
 
-        return view('seller.products.index', compact('products'));
+        $sellerProductIds = Product::where('seller_id', auth()->id())->pluck('id');
+
+        $totals = OrderItem::whereHas('variant', fn ($q) => $q->whereIn('product_id', $sellerProductIds))
+            ->whereHas('order', fn ($q) => $q->where('payment_status', 'paid'))
+            ->selectRaw('COALESCE(SUM(quantity), 0) as units_sold, COALESCE(SUM(quantity * marketplace_share_amount), 0) as share_earned')
+            ->first();
+
+        return view('seller.products.index', [
+            'products' => $products,
+            'totalUnitsSold' => (int) $totals->units_sold,
+            'totalShareEarned' => (float) $totals->share_earned,
+        ]);
     }
 
     public function create()

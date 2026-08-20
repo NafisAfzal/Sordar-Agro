@@ -9,16 +9,25 @@ class OrderItem extends Model
 {
     protected $fillable = [
         'order_id', 'product_variant_id', 'product_name',
-        'variant_size', 'price', 'quantity',
+        'variant_size', 'price', 'quantity', 'marketplace_share_amount',
     ];
 
     protected function casts(): array
     {
-        return ['price' => 'decimal:2'];
+        return [
+            'price' => 'decimal:2',
+            'marketplace_share_amount' => 'decimal:2',
+        ];
     }
 
     public function order(): BelongsTo   { return $this->belongsTo(Order::class); }
     public function variant(): BelongsTo { return $this->belongsTo(ProductVariant::class, 'product_variant_id'); }
 
     public function lineTotal(): float { return (float) $this->price * $this->quantity; }
+
+    /** Total marketplace share earned from this line, using the snapshotted per-unit amount. */
+    public function marketplaceShareTotal(): float
+    {
+        return (float) $this->marketplace_share_amount * $this->quantity;
+    }
 }

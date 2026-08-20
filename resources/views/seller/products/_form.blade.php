@@ -30,13 +30,6 @@
             <label class="form-label">Description</label>
             <textarea name="description" rows="4" class="form-control">{{ old('description', $product->description ?? '') }}</textarea>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Marketplace Share per Sale (TK)</label>
-            <input type="number" step="0.01" min="0.01" name="profit_share_amount"
-                   value="{{ old('profit_share_amount', $product->profit_share_amount ?? '') }}"
-                   class="form-control" required>
-            <small class="text-muted">For every unit sold, you'll share this amount (TK) with the marketplace.</small>
-        </div>
     </div>
 
     <div class="col-md-4">
@@ -73,43 +66,58 @@
 
 <hr>
 
-{{-- Fish variants: small / medium / large --}}
-<div id="fishVariants" class="{{ $isFish ? '' : 'd-none' }}">
-    <h6 class="fw-bold">Pricing &amp; stock per size <small class="text-muted">(stock = number of pairs)</small></h6>
-    @foreach (['small','medium','large'] as $i => $size)
-        <div class="row g-2 align-items-end mb-2 fish-row">
-            <div class="col-md-2"><label class="form-label small text-capitalize">{{ $size }}</label>
-                <input type="hidden" name="variants[{{ $i }}][size]" value="{{ $size }}" class="fish-input">
-            </div>
-            <div class="col-md-3">
-                <input type="number" step="0.01" min="0" name="variants[{{ $i }}][price]" value="{{ $val($size, 'price') }}" class="form-control fish-input" placeholder="Price ৳">
-            </div>
-            <div class="col-md-2">
-                <input type="number" min="0" name="variants[{{ $i }}][stock]" value="{{ $val($size, 'stock') }}" class="form-control fish-input" placeholder="Pairs">
-            </div>
-            <div class="col-md-5">
-                <input type="text" name="variants[{{ $i }}][size_description]" value="{{ $val($size, 'size_description') }}" class="form-control fish-input" placeholder="e.g. 2–3 cm juveniles">
-            </div>
-        </div>
-    @endforeach
-</div>
+<div class="card border mb-3">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3">Pricing, Stock &amp; Marketplace Share</h6>
 
-{{-- Non-fish: single standard variant --}}
-<div id="standardVariant" class="{{ $isFish ? 'd-none' : '' }}">
-    <h6 class="fw-bold">Pricing &amp; stock</h6>
-    <div class="row g-2 align-items-end">
-        <input type="hidden" name="variants[0][size]" value="standard" class="std-input">
-        <div class="col-md-3">
-            <label class="form-label small">Price ৳</label>
-            <input type="number" step="0.01" min="0" name="variants[0][price]" value="{{ $val('standard','price') }}" class="form-control std-input">
+        {{-- Fish variants: small / medium / large --}}
+        <div id="fishVariants" class="{{ $isFish ? '' : 'd-none' }}">
+            <h6 class="fw-semibold small text-muted">Pricing &amp; stock per size <small class="text-muted">(stock = number of pairs)</small></h6>
+            @foreach (['small','medium','large'] as $i => $size)
+                <div class="row g-2 align-items-end mb-2 fish-row">
+                    <div class="col-md-2"><label class="form-label small text-capitalize">{{ $size }}</label>
+                        <input type="hidden" name="variants[{{ $i }}][size]" value="{{ $size }}" class="fish-input">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" step="0.01" min="0" name="variants[{{ $i }}][price]" value="{{ $val($size, 'price') }}" class="form-control fish-input" placeholder="Price ৳">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" min="0" name="variants[{{ $i }}][stock]" value="{{ $val($size, 'stock') }}" class="form-control fish-input" placeholder="Pairs">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" name="variants[{{ $i }}][size_description]" value="{{ $val($size, 'size_description') }}" class="form-control fish-input" placeholder="e.g. 2–3 cm juveniles">
+                    </div>
+                </div>
+            @endforeach
         </div>
-        <div class="col-md-3">
-            <label class="form-label small">Stock (units)</label>
-            <input type="number" min="0" name="variants[0][stock]" value="{{ $val('standard','stock') }}" class="form-control std-input">
+
+        {{-- Non-fish: single standard variant --}}
+        <div id="standardVariant" class="{{ $isFish ? 'd-none' : '' }}">
+            <h6 class="fw-semibold small text-muted">Pricing &amp; stock</h6>
+            <div class="row g-2 align-items-end">
+                <input type="hidden" name="variants[0][size]" value="standard" class="std-input">
+                <div class="col-md-3">
+                    <label class="form-label small">Price ৳</label>
+                    <input type="number" step="0.01" min="0" name="variants[0][price]" value="{{ $val('standard','price') }}" class="form-control std-input">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Stock (units)</label>
+                    <input type="number" min="0" name="variants[0][stock]" value="{{ $val('standard','stock') }}" class="form-control std-input">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small">Note (optional)</label>
+                    <input type="text" name="variants[0][size_description]" value="{{ $val('standard','size_description') }}" class="form-control std-input">
+                </div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <label class="form-label small">Note (optional)</label>
-            <input type="text" name="variants[0][size_description]" value="{{ $val('standard','size_description') }}" class="form-control std-input">
+
+        {{-- Marketplace share: visually distinct since it's a key business term. --}}
+        <div class="alert alert-warning border-warning mt-3 mb-0">
+            <label class="form-label fw-semibold mb-1">Marketplace Share per Sale (TK)</label>
+            <input type="number" step="0.01" min="0.01" name="profit_share_amount"
+                   value="{{ old('profit_share_amount', $product->profit_share_amount ?? '') }}"
+                   class="form-control" required>
+            <small class="text-muted d-block mt-1">For every unit sold, you'll share this amount (TK) with the marketplace.</small>
         </div>
     </div>
 </div>

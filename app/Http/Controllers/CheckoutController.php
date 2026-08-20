@@ -73,6 +73,7 @@ class CheckoutController extends Controller
                     'variant_size'       => $item->variant->label,
                     'price'              => $item->variant->price,
                     'quantity'           => $item->quantity,
+                    'marketplace_share_amount' => $item->variant->product->profit_share_amount,
                 ]);
             }
 

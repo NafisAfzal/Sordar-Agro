@@ -13,6 +13,7 @@
                 ['Pending approvals', $stats['pending_products'], 'hourglass-split', 'warning', route('admin.products.index', ['status' => 'pending'])],
                 ['Orders', $stats['orders'], 'truck', 'success', route('admin.orders.index')],
                 ['Revenue (paid)', '৳'.number_format($stats['revenue'], 2), 'cash-stack', 'success', null],
+                ['Marketplace share (paid)', '৳'.number_format($stats['marketplace_share'], 2), 'wallet2', 'success', null],
             ];
         @endphp
         @foreach ($cards as [$label, $value, $icon, $color, $link])
@@ -43,6 +44,29 @@
             @if ($stats['pending_community'] > 0)<a href="{{ route('admin.community.index') }}">{{ $stats['pending_community'] }} community post(s) to review</a>@endif.
         </div>
     @endif
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="fw-bold mb-3">Marketplace share by seller &amp; product <small class="text-muted fw-normal">(paid orders only)</small></h6>
+            @if ($shareBreakdown->isEmpty())
+                <p class="text-muted mb-0">No paid sales yet.</p>
+            @else
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Seller</th><th>Product</th><th>Units sold</th><th>Share earned</th></tr></thead>
+                    <tbody>
+                        @foreach ($shareBreakdown as $row)
+                            <tr>
+                                <td>{{ $row->seller_name }}</td>
+                                <td>{{ $row->product_name }}</td>
+                                <td>{{ $row->units_sold }}</td>
+                                <td class="fw-semibold">৳{{ number_format($row->share_earned, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    </div>
 
     <div class="card border-0 shadow-sm">
         <div class="card-body">
