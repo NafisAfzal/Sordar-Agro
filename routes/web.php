@@ -106,11 +106,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/wishlist/{product}', [WishlistController::class, 'add'])->name('wishlist.add');
         Route::delete('/wishlist/{wishlist}', [WishlistController::class, 'remove'])->name('wishlist.remove');
 
-        // Checkout + simulated payment
-        Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
-        Route::post('/checkout', [CheckoutController::class, 'place'])->name('checkout.place');
-        Route::get('/payment/{order}', [PaymentController::class, 'show'])->name('payment.show');
-        Route::post('/payment/{order}', [PaymentController::class, 'process'])->name('payment.process');
+        // Checkout + simulated payment — email must be verified before a
+        // real order can be placed or paid for. Browsing/cart/wishlist stay
+        // open to unverified accounts by design.
+        Route::middleware('verified')->group(function () {
+            Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+            Route::post('/checkout', [CheckoutController::class, 'place'])->name('checkout.place');
+            Route::get('/payment/{order}', [PaymentController::class, 'show'])->name('payment.show');
+            Route::post('/payment/{order}', [PaymentController::class, 'process'])->name('payment.process');
+        });
 
         // Orders + tracking
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
