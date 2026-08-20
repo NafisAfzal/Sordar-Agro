@@ -24,6 +24,7 @@ class AdminSellerCapabilityTest extends TestCase
             'category_id' => $category->id,
             'description' => 'Added directly by an administrator.',
             'is_fish'     => 1,
+            'profit_share_amount' => 50,
             'variants'    => [
                 ['size' => 'standard', 'price' => 300, 'stock' => 10],
             ],

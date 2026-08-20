@@ -14,7 +14,7 @@
             <div class="table-responsive">
                 <table class="table align-middle mb-0">
                     <thead class="table-light">
-                        <tr><th>Name</th><th>Category</th><th>From</th><th>Stock</th><th>Status</th><th></th></tr>
+                        <tr><th>Name</th><th>Category</th><th>From</th><th>Stock</th><th>Profit Share</th><th>Status</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach ($products as $p)
@@ -23,8 +23,12 @@
                                 <td>{{ $p->category->name ?? '—' }}</td>
                                 <td>৳{{ number_format($p->starting_price, 2) }}</td>
                                 <td>{{ $p->total_stock }}</td>
+                                <td>৳{{ number_format($p->profit_share_amount, 2) }}</td>
                                 <td>
                                     <span class="badge bg-{{ ['pending'=>'warning','approved'=>'success','rejected'=>'danger'][$p->status] }}">{{ ucfirst($p->status) }}</span>
+                                    @if ($p->status === 'rejected' && $p->rejection_reason_category)
+                                        <span class="badge bg-danger">{{ \App\Models\Product::REJECTION_REASONS[$p->rejection_reason_category] }}</span>
+                                    @endif
                                     @if ($p->status === 'rejected' && $p->admin_feedback)
                                         <i class="bi bi-info-circle text-danger" title="{{ $p->admin_feedback }}"></i>
                                     @endif

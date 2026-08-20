@@ -12,10 +12,18 @@ class Product extends Model
 {
     use HasFactory;
 
+    public const REJECTION_REASONS = [
+        'profit_share'    => 'Profit Share Amount',
+        'price'           => 'Price',
+        'quantity'        => 'Quantity',
+        'product_quality' => 'Product Quality',
+        'other'           => 'Other',
+    ];
+
     protected $fillable = [
         'seller_id', 'category_id', 'name', 'slug', 'description', 'thumbnail',
-        'is_fish', 'min_tank_size_litres', 'temperament',
-        'status', 'admin_feedback', 'is_featured',
+        'is_fish', 'min_tank_size_litres', 'temperament', 'profit_share_amount',
+        'status', 'admin_feedback', 'is_featured', 'rejection_reason_category',
     ];
 
     protected function casts(): array
@@ -23,6 +31,7 @@ class Product extends Model
         return [
             'is_fish' => 'boolean',
             'is_featured' => 'boolean',
+            'profit_share_amount' => 'decimal:2',
         ];
     }
 

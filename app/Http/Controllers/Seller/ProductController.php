@@ -42,6 +42,7 @@ class ProductController extends Controller
                 'is_fish'     => $request->boolean('is_fish'),
                 'min_tank_size_litres' => $data['min_tank_size_litres'] ?? null,
                 'temperament' => $data['temperament'] ?? null,
+                'profit_share_amount' => $data['profit_share_amount'],
                 // Admin-submitted products skip the approval queue — the
                 // admin is the approver, so requiring self-approval would
                 // be illogical. Seller submissions still await approval.
@@ -89,8 +90,10 @@ class ProductController extends Controller
                 'is_fish'     => $request->boolean('is_fish'),
                 'min_tank_size_litres' => $data['min_tank_size_litres'] ?? null,
                 'temperament' => $data['temperament'] ?? null,
+                'profit_share_amount' => $data['profit_share_amount'],
                 'status'      => 'pending',      // re-submit for approval
                 'admin_feedback' => null,
+                'rejection_reason_category' => null,
             ]);
 
             $product->variants()->delete();
@@ -122,6 +125,7 @@ class ProductController extends Controller
             'is_fish'     => ['nullable', 'boolean'],
             'min_tank_size_litres' => ['nullable', 'integer', 'min:0'],
             'temperament' => ['nullable', 'in:peaceful,semi-aggressive,aggressive'],
+            'profit_share_amount' => ['required', 'numeric', 'gt:0'],
 
             // Fish: three size rows. Non-fish: a single "standard" row. The
             // form posts arrays keyed by size; we validate the prices/stock.

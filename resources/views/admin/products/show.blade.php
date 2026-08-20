@@ -20,6 +20,11 @@
             </p>
             <p>{{ $product->description }}</p>
 
+            <div class="alert alert-info d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-cash-coin"></i> <strong>Profit Share Offered</strong></span>
+                <span class="fs-5 fw-bold">৳{{ number_format($product->profit_share_amount, 2) }} <small class="fw-normal">per unit sold</small></span>
+            </div>
+
             <table class="table table-sm">
                 <thead><tr><th>Size</th><th>Price</th><th>Stock</th><th>Note</th></tr></thead>
                 <tbody>
@@ -38,7 +43,14 @@
                 <div class="collapse mt-3" id="rejectBox">
                     <form method="POST" action="{{ route('admin.products.reject', $product) }}">
                         @csrf @method('PATCH')
-<label class="form-label small fw-semibold">Why is this being rejected?</label>
+                        <label class="form-label small fw-semibold">Reason category</label>
+                        <select name="rejection_reason_category" class="form-select mb-2" required>
+                            <option value="">Choose a reason…</option>
+                            @foreach (\App\Models\Product::REJECTION_REASONS as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <label class="form-label small fw-semibold">Details for the seller</label>
                         <textarea name="admin_feedback" class="form-control mb-2" rows="3" placeholder="Reason / feedback for the seller" required></textarea>
                         <button class="btn btn-outline-danger btn-sm">Confirm rejection</button>
                     </form>
@@ -53,7 +65,12 @@
             @endif
 
             @if ($product->admin_feedback)
-                <div class="alert alert-secondary mt-3 small">Previous feedback: {{ $product->admin_feedback }}</div>
+                <div class="alert alert-secondary mt-3 small">
+                    @if ($product->rejection_reason_category)
+                        <span class="badge bg-danger mb-1">Rejected: {{ \App\Models\Product::REJECTION_REASONS[$product->rejection_reason_category] }}</span><br>
+                    @endif
+                    Previous feedback: {{ $product->admin_feedback }}
+                </div>
             @endif
         </div>
     </div>

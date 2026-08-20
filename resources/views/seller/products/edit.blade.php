@@ -4,7 +4,12 @@
 @section('content')
     <h3 class="mb-4">Edit product</h3>
     @if ($product->status === 'rejected' && $product->admin_feedback)
-        <div class="alert alert-warning"><strong>Admin feedback:</strong> {{ $product->admin_feedback }}</div>
+        <div class="alert alert-warning">
+            @if ($product->rejection_reason_category)
+                <span class="badge bg-danger mb-2">Rejected: {{ \App\Models\Product::REJECTION_REASONS[$product->rejection_reason_category] }}</span><br>
+            @endif
+            <strong>Admin feedback:</strong> {{ $product->admin_feedback }}
+        </div>
     @endif
     <div class="card border-0 shadow-sm">
         <div class="card-body">

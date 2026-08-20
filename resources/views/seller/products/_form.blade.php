@@ -30,6 +30,13 @@
             <label class="form-label">Description</label>
             <textarea name="description" rows="4" class="form-control">{{ old('description', $product->description ?? '') }}</textarea>
         </div>
+        <div class="mb-3">
+            <label class="form-label">Profit Share (TK per unit sold)</label>
+            <input type="number" step="0.01" min="0.01" name="profit_share_amount"
+                   value="{{ old('profit_share_amount', $product->profit_share_amount ?? '') }}"
+                   class="form-control" required>
+            <small class="text-muted">The flat amount (in TK) you'll pay the marketplace for every unit sold — not a percentage.</small>
+        </div>
     </div>
 
     <div class="col-md-4">

@@ -36,19 +36,25 @@ class ProductController extends Controller
 
     public function approve(Product $product)
     {
-        $product->update(['status' => 'approved', 'admin_feedback' => null]);
+        $product->update([
+            'status' => 'approved',
+            'admin_feedback' => null,
+            'rejection_reason_category' => null,
+        ]);
         return back()->with('success', "“{$product->name}” approved and now live.");
     }
 
     public function reject(Request $request, Product $product)
     {
         $data = $request->validate([
+            'rejection_reason_category' => ['required', 'in:profit_share,price,quantity,product_quality,other'],
             'admin_feedback' => ['required', 'string', 'max:1000'],
         ]);
 
         $product->update([
             'status' => 'rejected',
             'admin_feedback' => $data['admin_feedback'],
+            'rejection_reason_category' => $data['rejection_reason_category'],
         ]);
 
         return back()->with('success', 'Product rejected with feedback sent to the seller.');
