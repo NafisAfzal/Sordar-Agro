@@ -45,6 +45,11 @@
                 </div>
             @else
                 <p class="text-success"><i class="bi bi-check-circle"></i> This product is live in the store.</p>
+                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil"></i> Edit</a>
+                <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="d-inline" onsubmit="return confirm('Delete “{{ $product->name }}” permanently? This cannot be undone.')">
+                    @csrf @method('DELETE')
+                    <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+                </form>
             @endif
 
             @if ($product->admin_feedback)

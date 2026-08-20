@@ -160,6 +160,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/products/inventory', [AdminInventoryController::class, 'index'])->name('products.inventory');
         Route::patch('/variants/{variant}/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust');
         Route::get('/products/{product}', [AdminProductController::class, 'show'])->name('products.show');
+        Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
+        Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
+        Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])->name('products.destroy');
         Route::patch('/products/{product}/approve', [AdminProductController::class, 'approve'])->name('products.approve');
         Route::patch('/products/{product}/reject', [AdminProductController::class, 'reject'])->name('products.reject');
 
