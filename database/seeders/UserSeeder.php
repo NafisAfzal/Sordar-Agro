@@ -10,7 +10,10 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Administrator — seeded only, never creatable through the app.
-        User::updateOrCreate(
+        // firstOrCreate: only sets these attributes (incl. password) the
+        // first time this runs, so re-seeding on a later deploy doesn't
+        // reset a password that was changed since.
+        User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name'      => 'Site Administrator',
