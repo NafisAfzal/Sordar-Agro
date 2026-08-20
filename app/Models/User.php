@@ -35,12 +35,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isCustomer(): bool { return $this->role === 'customer'; }
 
     /**
-     * Sellers retain all customer (buyer) abilities, so "can shop" is true
-     * for both customers and sellers.
+     * Sellers retain all customer (buyer) abilities, and admins can also
+     * act as a seller, so "can shop" is true for all three roles.
      */
     public function canShop(): bool
     {
-        return in_array($this->role, ['customer', 'seller'], true);
+        return in_array($this->role, ['customer', 'seller', 'admin'], true);
     }
 
     /** Where to send the user after login, based on role. */

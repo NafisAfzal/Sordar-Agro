@@ -94,7 +94,7 @@ Route::middleware('auth')->group(function () {
     | Shopping routes — customers AND sellers (sellers keep buyer powers).
     | password.changed forces temp-password sellers to update first.
     */
-    Route::middleware(['role:customer,seller', 'password.changed'])->group(function () {
+    Route::middleware(['role:customer,seller,admin', 'password.changed'])->group(function () {
         // Cart
         Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
         Route::post('/cart/{variant}', [CartController::class, 'add'])->name('cart.add');
@@ -127,7 +127,7 @@ Route::middleware('auth')->group(function () {
 | Seller workspace
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:seller', 'password.changed'])
+Route::middleware(['auth', 'role:seller,admin', 'password.changed'])
     ->prefix('seller')->name('seller.')->group(function () {
         Route::get('/dashboard', [SellerDashboard::class, 'index'])->name('dashboard');
         Route::get('/products', [SellerProductController::class, 'index'])->name('products.index');

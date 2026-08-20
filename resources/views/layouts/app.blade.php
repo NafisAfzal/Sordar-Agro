@@ -71,7 +71,7 @@
                             @if (auth()->user()->isAdmin())
                                 <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
                             @endif
-                            @if (auth()->user()->isSeller())
+                            @if (auth()->user()->isSeller() || auth()->user()->isAdmin())
                                 <li><a class="dropdown-item" href="{{ route('seller.dashboard') }}"><i class="bi bi-shop me-2"></i>Seller Workspace</a></li>
                             @endif
                             @if (auth()->user()->canShop())

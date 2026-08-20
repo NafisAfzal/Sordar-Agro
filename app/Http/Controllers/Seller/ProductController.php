@@ -42,14 +42,19 @@ class ProductController extends Controller
                 'is_fish'     => $request->boolean('is_fish'),
                 'min_tank_size_litres' => $data['min_tank_size_litres'] ?? null,
                 'temperament' => $data['temperament'] ?? null,
-                'status'      => 'pending', // seller submissions await approval
+                // Admin-submitted products skip the approval queue — the
+                // admin is the approver, so requiring self-approval would
+                // be illogical. Seller submissions still await approval.
+                'status'      => auth()->user()->isAdmin() ? 'approved' : 'pending',
             ]);
 
             $this->saveVariants($product, $request);
         });
 
         return redirect()->route('seller.products.index')
-            ->with('success', 'Product submitted and awaiting admin approval.');
+            ->with('success', auth()->user()->isAdmin()
+                ? 'Product created and published.'
+                : 'Product submitted and awaiting admin approval.');
     }
 
     public function edit(Product $product)
