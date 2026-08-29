@@ -24,7 +24,7 @@ payment flow, simulated courier tracking, care guides, and a community knowledge
 |------|------------------|--------------|
 | **Customer** | Self-registers at `/register` | Browse, wishlist, cart, checkout, track orders, contribute to community |
 | **Partner Seller** | Provisioned by an admin (forced password change on first login) | Everything a customer can do **plus** list/manage products (subject to admin approval) |
-| **Administrator** | Seeded only — never creatable through the UI | Approve/reject products, manage inventory, orders & couriers, users, sellers, care guides, community |
+| **Administrator** | Seeded only — never creatable through the UI | Approve/reject products, manage inventory, orders & couriers, users, sellers, care guides, community, **sales analytics dashboard** (date-filtered revenue, own vs seller product breakdown, marketplace earnings, best-selling products) |
 
 ---
 
@@ -114,6 +114,72 @@ approval queue, and three published care guides.
 
 ---
 
+## Production deployment
+
+The repository ships a single-container `Dockerfile`. There is evidence of deployment on
+Railway (a persistent volume comment and the `PORT` convention), but **no Railway-specific
+configuration files are committed** — platform settings live in your hosting dashboard, not
+in this repository. The container does **not** use nginx/Apache/PHP-FPM; it serves via
+`php artisan serve`.
+
+### Startup behavior (Docker)
+
+On boot the container performs exactly three steps:
+
+1. Restore the bundled seed media into `storage/app/public` (non-destructive `cp -rn`).
+2. Run `php artisan migrate --force`.
+3. Start the Laravel application on the supplied `PORT`.
+
+### Seeding
+
+**Normal production startup does NOT run database seeders.**
+`--seed` was intentionally removed from automatic startup: the seeders use
+`updateOrCreate`, so running them against an existing database can reset demo
+seller/customer passwords and overwrite seeded product prices, variant stock, SKUs,
+categories, and care-guide content. Run seeders only deliberately in
+development/demo environments (`php artisan migrate --seed`), and never against a real
+production database without reviewing those consequences first.
+
+### Required application environment
+
+Supply these through your deployment environment — do not rely on `.env.example`
+defaults, which are local-development values:
+
+```
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-real-production-domain
+APP_KEY=<persistent-production-key>
+```
+
+- `APP_KEY` **must be provided by you**: neither Docker startup nor Composer generates one.
+  Generate a value once with `php artisan key:generate --show` and store it as an
+  environment variable. It must remain stable across restarts/redeployments — rotating it
+  invalidates sessions and encrypted data.
+- With no `APP_KEY` set, the application fails at runtime ("No application encryption key").
+
+### Database
+
+Provide production database credentials exclusively as environment variables:
+`DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`.
+Never commit production credentials to the repository.
+
+### Mail
+
+The example configuration uses `MAIL_MAILER=log`, which writes "emails" to
+`storage/logs/laravel.log` and is suitable for **local development only**. Real
+deployment must configure an actual mail provider (this project has used Brevo's HTTP
+API) with that provider's own credentials/sender domain. Do not ship customer-facing
+email on the `log` driver.
+
+### Demo credentials in production
+
+The demo accounts above are retained for grading/local demonstration only.
+Before any real deployment they must be changed or removed — never expose seeded
+demo credentials on a public production instance.
+
+---
+
 ## Feature walkthrough (suggested demo path)
 
 1. **Browse & filter** the shop (`/products`) — try the category, price, tank-size,
@@ -140,10 +206,8 @@ Run the full suite with:
 php artisan test
 ```
 
-As of this writing the suite has **34 tests (50 assertions)**, all passing, run against an
-in-memory SQLite database (configured in `phpunit.xml`). Six tests emit a harmless
-`BigNumber::of()` float-cast deprecation notice from a decimal-cast dependency — cosmetic,
-not a functional issue.
+As of this writing the suite has **303 tests (692 assertions)**, all passing, run against an
+in-memory SQLite database (configured in `phpunit.xml`).
 
 ### Unit tests (`tests/Unit/`)
 
@@ -217,9 +281,7 @@ after this sprint's merge and all items passed.
   does not call a live bKash/Nagad API to verify the transaction actually occurred.
 - **Courier tracking is simulated**: a courier and tracking code are assigned for demonstration
   purposes, without integrating a real Pathao/Steadfast API.
-- **Minor test noise**: 6 of the 34 tests emit a deprecation notice from a decimal-cast dependency
-  (`BigNumber::of()` being passed a float). It doesn't affect correctness or pass/fail status, just
-  a warning worth cleaning up eventually by casting to string first.
+- **Minor test noise**: The test suite runs clean with no deprecation warnings in the current environment (SQLite returns decimal columns as strings). The `BigNumber::of()` float-cast deprecation from the decimal-cast dependency would only surface if float values were passed to decimal fields — all tests use integer or string values for prices.
 
 ---
 

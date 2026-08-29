@@ -4,16 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\CareGuide;
 use App\Models\Category;
+use App\Models\CommunitySubmission;
 use App\Models\Product;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $featured = Product::approved()
+        $featured = Product::where('products.status', 'approved')
+            ->select('products.*')
             ->with('variants', 'category')
-            ->orderByDesc('is_featured')
-            ->latest()
+            ->join('product_variants', 'product_variants.product_id', '=', 'products.id')
+            ->join('order_items', 'order_items.product_variant_id', '=', 'product_variants.id')
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->where('orders.payment_status', 'paid')
+            ->where('orders.status', '!=', 'cancelled')
+            ->groupBy('products.id')
+            ->orderByRaw('SUM(order_items.quantity) DESC')
+            ->orderByDesc('products.id')
             ->take(4)
             ->get();
 
@@ -22,6 +30,12 @@ class HomeController extends Controller
         $guides = CareGuide::whereNotNull('published_at')
             ->latest('published_at')->take(3)->get();
 
-        return view('storefront.home', compact('featured', 'categories', 'guides'));
+        $submissions = CommunitySubmission::with('user')
+            ->where('status', 'approved')
+            ->latest()
+            ->take(2)
+            ->get();
+
+        return view('storefront.home', compact('featured', 'categories', 'guides', 'submissions'));
     }
 }

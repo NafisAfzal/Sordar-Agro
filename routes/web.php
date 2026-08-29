@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\PasswordController;
 // ---- Storefront controllers -------------------------------------------
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
@@ -38,6 +39,8 @@ use App\Http\Controllers\Admin\CommunityController as AdminCommunityController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('sitemap.robots');
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/search/suggestions', [ProductController::class, 'suggestions'])->name('products.suggestions');

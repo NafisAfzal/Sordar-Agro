@@ -1,5 +1,7 @@
 @extends('layouts.app')
-@section('title', 'Community Knowledge')
+@section('title', 'Community Knowledge — Sordar Agro')
+@section('meta_description', 'Tips and experiences shared by the Sordar Agro aquarium community, reviewed and approved before publishing.')
+@section('canonical_url', route('community.index'))
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0"><i class="bi bi-people"></i> Community knowledge</h3>

@@ -4,7 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @php
+        // Only genuine public storefront pages may be indexed; everything
+        // else (cart, checkout, payment, orders, wishlist, auth, admin,
+        // seller) is noindex,nofollow regardless of view-level sections.
+        $isIndexable = request()->routeIs([
+            'home', 'products.index', 'products.show',
+            'care.index', 'care.show', 'community.index',
+        ]);
+    @endphp
     <title>@yield('title', 'Sordar Agro — Aquarium Marketplace')</title>
+    <meta name="description" content="@yield('meta_description', 'Sordar Agro is a Bangladesh-based aquarium marketplace for healthy fish, aquatic plants, fish food and equipment.')">
+    <meta name="robots" content="{{ $isIndexable ? 'index,follow' : 'noindex,nofollow' }}">
+    @hasSection('canonical_url')
+        <link rel="canonical" href="@yield('canonical_url')">
+    @endif
+    <meta property="og:site_name" content="Sordar Agro">
+    <meta property="og:title" content="@yield('title', 'Sordar Agro — Aquarium Marketplace')">
+    <meta property="og:description" content="@yield('meta_description', 'Healthy aquarium fish, aquatic plants, fish food and equipment for hobbyists in Bangladesh.')">
+    @if ($isIndexable)
+        <meta property="og:url" content="@yield('canonical_url', url()->current())">
+        <meta property="og:type" content="@yield('og_type', 'website')">
+        @hasSection('og_image')
+            <meta property="og:image" content="@yield('og_image')">
+        @endif
+    @endif
     <link rel="icon" type="image/svg+xml" href="{{ asset('img/favicon.svg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +52,8 @@
     <div class="main-header">
         <div class="container d-flex align-items-center justify-content-between">
             <!-- Brand -->
-            <a class="brand-mark d-flex align-items-center gap-2 text-decoration-none text-sa" href="{{ route('home') }}">
+            <a class="brand-mark d-flex align-items-center gap-2 text-decoration-none text-sa"
+               href="{{ route('home') }}" aria-label="Sordar Agro — Home">
                 <i class="bi bi-water fs-2"></i>
                 <span class="fs-4 d-none d-lg-inline">SORDAR AGRO</span>
             </a>
@@ -50,7 +75,7 @@
             <!-- Actions -->
             <div class="d-flex align-items-center gap-2 gap-lg-3">
                 <!-- Mobile Search Toggle -->
-                <button class="btn d-md-none p-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSearch">
+                <button class="btn d-md-none p-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSearch" aria-label="Search" aria-expanded="false" aria-controls="mobileSearch">
                     <i class="bi bi-search fs-5"></i>
                 </button>
 
@@ -71,7 +96,7 @@
                     @endif
 
                     <div class="dropdown">
-                        <a href="#" class="header-action-btn dropdown-toggle px-2" data-bs-toggle="dropdown">
+                        <a href="#" class="header-action-btn dropdown-toggle px-2" data-bs-toggle="dropdown" aria-label="Account menu: {{ auth()->user()->name }}">
                             <i class="bi bi-person-circle fs-5"></i>
                             <span class="d-none d-lg-inline">{{ Str::limit(auth()->user()->name, 12) }}</span>
                         </a>
@@ -104,7 +129,7 @@
                 @endauth
 
                 <!-- Mobile Menu Toggle -->
-                <button class="btn d-lg-none p-2" type="button" id="mobileMenuTrigger" aria-label="Open Menu">
+                <button class="btn d-lg-none p-2" type="button" id="mobileMenuTrigger" aria-label="Open Menu" aria-expanded="false" aria-controls="mobileDrawer">
                     <i class="bi bi-list fs-4"></i>
                 </button>
             </div>
@@ -141,7 +166,7 @@
 
 <!-- Mobile Menu Drawer -->
 <div class="mobile-drawer-overlay" id="mobileDrawerOverlay"></div>
-<div class="mobile-drawer" id="mobileDrawer">
+<div class="mobile-drawer" id="mobileDrawer" inert>
     <div class="mobile-drawer-header">
         <div class="brand-mark d-flex align-items-center gap-2 text-sa">
             <i class="bi bi-water fs-3"></i>
@@ -271,6 +296,7 @@
     if (!trigger || !drawer || !overlay || !closeBtn) return;
 
     function openDrawer() {
+        drawer.inert = false;
         drawer.classList.add('active');
         overlay.classList.add('active');
         trigger.setAttribute('aria-expanded', 'true');
@@ -282,6 +308,7 @@
         overlay.classList.remove('active');
         trigger.setAttribute('aria-expanded', 'false');
         drawer.setAttribute('aria-hidden', 'true');
+        drawer.inert = true;
         trigger.focus();
     }
 

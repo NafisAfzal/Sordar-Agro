@@ -5,12 +5,12 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
         <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" value="{{ old('email') }}" class="form-control" required autofocus>
+            <label class="form-label" for="login_email">Email</label>
+            <input type="email" name="email" id="login_email" value="{{ old('email') }}" class="form-control" required autofocus>
         </div>
         <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" required>
+            <label class="form-label" for="login_password">Password</label>
+            <input type="password" name="password" id="login_password" class="form-control" required>
         </div>
         <div class="d-flex justify-content-between mb-3">
             <div class="form-check">

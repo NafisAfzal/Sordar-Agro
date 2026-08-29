@@ -62,18 +62,20 @@ class PaymentController extends Controller
 
         try {
             DB::transaction(function () use ($order, $data) {
-                $order->update([
+                $updated = $order->update([
                     'payment_status' => 'paid',
                     'transaction_id' => strtoupper(trim($data['transaction_id'])),
                 ]);
 
-                foreach ($order->items as $item) {
-                    // Row lock prevents two concurrent payments overselling.
-                    $variant = $item->variant()->lockForUpdate()->first();
-                    if (! $variant || $variant->stock < $item->quantity) {
-                        throw new \RuntimeException('insufficient_stock');
+                if ($updated) {
+                    foreach ($order->items as $item) {
+                        // Row lock prevents two concurrent payments overselling.
+                        $variant = $item->variant()->lockForUpdate()->first();
+                        if (! $variant || $variant->stock < $item->quantity) {
+                            throw new \RuntimeException('insufficient_stock');
+                        }
+                        $variant->decrement('stock', $item->quantity);
                     }
-                    $variant->decrement('stock', $item->quantity);
                 }
 
                 Cart::where('user_id', $order->user_id)->delete();

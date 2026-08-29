@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class ProductTest extends TestCase
 {
-    private function variant(float $price, int $stock): ProductVariant
+    private function variant(string $price, int $stock): ProductVariant
     {
         $variant = new ProductVariant();
         $variant->price = $price;
@@ -21,9 +21,9 @@ class ProductTest extends TestCase
     {
         $product = new Product();
         $product->setRelation('variants', collect([
-            $this->variant(500.00, 5),
-            $this->variant(300.00, 5),
-            $this->variant(800.00, 5),
+            $this->variant('500.00', 5),
+            $this->variant('300.00', 5),
+            $this->variant('800.00', 5),
         ]));
 
         $this->assertSame(300.0, $product->starting_price);
@@ -33,7 +33,7 @@ class ProductTest extends TestCase
     {
         $product = new Product();
         $product->setRelation('variants', collect([
-            $this->variant(450.00, 5),
+            $this->variant('450.00', 5),
         ]));
 
         $this->assertSame(450.0, $product->starting_price);
@@ -43,9 +43,9 @@ class ProductTest extends TestCase
     {
         $product = new Product();
         $product->setRelation('variants', collect([
-            $this->variant(500.00, 5),
-            $this->variant(300.00, 0),
-            $this->variant(800.00, 10),
+            $this->variant('500.00', 5),
+            $this->variant('300.00', 0),
+            $this->variant('800.00', 10),
         ]));
 
         $this->assertSame(15, $product->total_stock);
@@ -55,8 +55,8 @@ class ProductTest extends TestCase
     {
         $product = new Product();
         $product->setRelation('variants', collect([
-            $this->variant(500.00, 0),
-            $this->variant(300.00, 0),
+            $this->variant('500.00', 0),
+            $this->variant('300.00', 0),
         ]));
 
         $this->assertTrue($product->isOutOfStock());
@@ -66,8 +66,8 @@ class ProductTest extends TestCase
     {
         $product = new Product();
         $product->setRelation('variants', collect([
-            $this->variant(500.00, 0),
-            $this->variant(300.00, 5),
+            $this->variant('500.00', 0),
+            $this->variant('300.00', 5),
         ]));
 
         $this->assertFalse($product->isOutOfStock());

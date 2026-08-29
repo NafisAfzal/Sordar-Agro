@@ -11,16 +11,19 @@
 <div class="row justify-content-center">
     <div class="col-lg-9">
         <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
+            <div class="card-body p-4 payment-card">
 
                 <div class="text-center mb-4">
                     <h3 class="display-6 fw-bold text-{{ $colour }}">{{ $brand }}</h3>
                     <p class="text-muted mb-0">Complete your payment to confirm the order</p>
                 </div>
 
-                <div class="border rounded p-3 bg-light mb-4">
-                    <div class="d-flex justify-content-between"><span>Order</span><strong>{{ $order->order_number }}</strong></div>
-                    <div class="d-flex justify-content-between fs-5">
+                <div class="payment-order-box">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Order</span>
+                        <strong>{{ $order->order_number }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center fs-5 mt-2">
                         <span>Amount to send</span>
                         <strong class="text-{{ $colour }}">৳{{ number_format($order->total, 2) }}</strong>
                     </div>
@@ -30,11 +33,11 @@
                     <div class="col-md-5 text-center">
                         @if (file_exists(public_path('img/payment-qr.png')))
                             <img src="{{ asset('img/payment-qr.png') }}" alt="Payment QR code"
-                                 class="img-fluid rounded border p-2 bg-white" style="max-width:200px;">
+                                 class="img-fluid rounded border p-2 bg-white payment-qr">
                         @else
                             <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ urlencode($number) }}"
                                  alt="QR code containing the payment number"
-                                 class="img-fluid rounded border p-2 bg-white" style="max-width:200px;">
+                                 class="img-fluid rounded border p-2 bg-white payment-qr">
                         @endif
                         <p class="small fw-semibold mt-2 mb-0 text-sa">Scan with your phone camera to copy the number</p>
                     </div>
@@ -49,7 +52,7 @@
                         </div>
 
                         <h6 class="fw-bold">How to pay</h6>
-                        <ol class="small mb-0 ps-3">
+                        <ol class="small mb-0 ps-3 payment-steps">
                             <li class="mb-1">Open your <strong>{{ $brand }}</strong> app.</li>
                             <li class="mb-1">Choose <strong>Send Money</strong>.</li>
                             <li class="mb-1">Scan the QR, or type the number <strong>{{ $number }}</strong>.</li>
@@ -64,19 +67,18 @@
 
                 <form method="POST" action="{{ route('payment.process', $order) }}">
                     @csrf
-                    <label class="form-label fw-semibold">Transaction ID (TrxID)</label>
+                    <label class="form-label fw-semibold" for="transaction_id">Transaction ID (TrxID)</label>
                     <div class="input-group mb-2">
                         <span class="input-group-text"><i class="bi bi-receipt"></i></span>
-                        <input type="text" name="transaction_id" class="form-control @error('transaction_id') is-invalid @enderror"
+                        <input type="text" id="transaction_id" name="transaction_id" class="form-control @error('transaction_id') is-invalid @enderror"
                                placeholder="e.g. 9F7A2K1B3C" value="{{ old('transaction_id') }}" required>
                     </div>
                     @error('transaction_id')
                         <div class="text-danger small mb-2">{{ $message }}</div>
                     @enderror
-                    <div class="alert alert-warning small fw-semibold mb-2">
+                    <div class="alert alert-warning small fw-semibold mb-2 payment-warning">
                         <i class="bi bi-exclamation-circle"></i>
-                        Enter the exact TrxID from your {{ $brand }} confirmation SMS. Your order is confirmed once submitted
-                        and verified by our team.
+                        Enter the exact TrxID from your {{ $brand }} confirmation SMS. Your order will be confirmed once the transaction is verified by our team.
                     </div>
                     <button class="btn btn-sa btn-lg w-100">
                         <i class="bi bi-check-circle"></i> Submit payment details

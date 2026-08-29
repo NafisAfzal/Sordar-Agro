@@ -1,5 +1,7 @@
 @extends('layouts.app')
-@section('title', 'Care Guides')
+@section('title', 'Care Guides — Sordar Agro')
+@section('meta_description', 'Practical fish and plant care guides from Sordar Agro: tank setup, water conditions and day-to-day aquarium maintenance.')
+@section('canonical_url', route('care.index'))
 @section('content')
     <h3 class="mb-4"><i class="bi bi-journal-text"></i> Fish &amp; plant care guides</h3>
 
@@ -11,7 +13,7 @@
                 <div class="col-md-4">
                     <a href="{{ route('care.show', $guide) }}" class="card product-card text-decoration-none h-100">
                         @if ($guide->image)
-                            <img src="{{ asset('storage/'.$guide->image) }}" class="card-img-top product-thumb" alt="">
+                            <img src="{{ asset('storage/'.$guide->image) }}" class="card-img-top product-thumb" alt="{{ $guide->title }}" loading="lazy" decoding="async">
                         @else
                             <div class="thumb-placeholder"><i class="bi bi-journal-text"></i></div>
                         @endif
