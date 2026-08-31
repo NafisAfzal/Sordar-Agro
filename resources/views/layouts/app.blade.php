@@ -216,14 +216,51 @@
     @yield('content')
 </main>
 
-<footer class="bg-dark text-light py-4 mt-5">
-    <div class="container text-center">
-        <h5 class="brand-mark mb-2 d-flex align-items-center justify-content-center gap-2">
-            <i class="bi bi-water"></i>
-            <span>SORDAR AGRO</span>
-        </h5>
-        <p class="text-secondary mb-3">Your online aquarium marketplace</p>
-        <p class="text-secondary small mb-0">&copy; {{ date('Y') }} Sordar Agro. All rights reserved.</p>
+<footer class="bg-dark text-light pt-5 pb-4 mt-5">
+    <div class="container">
+        <div class="row g-4 small">
+            <div class="col-12 col-md-4">
+                <h6 class="brand-mark mb-2 d-flex align-items-center gap-2">
+                    <i class="bi bi-water"></i>
+                    <span>SORDAR AGRO</span>
+                </h6>
+                <p class="text-secondary mb-3" style="line-height:1.6">Your online aquarium marketplace for healthy fish, aquatic plants, fish food and equipment in Bangladesh.</p>
+            </div>
+            <div class="col-6 col-md-2">
+                <h6 class="fw-semibold mb-3 small">Shop</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="{{ route('products.index') }}" class="text-secondary text-decoration-none">Shop all</a></li>
+                    <li class="mb-2"><a href="{{ route('products.index', ['category' => 'fish']) }}" class="text-secondary text-decoration-none">Fish</a></li>
+                    <li class="mb-2"><a href="{{ route('products.index', ['category' => 'aquatic-plants']) }}" class="text-secondary text-decoration-none">Plants</a></li>
+                    <li class="mb-2"><a href="{{ route('products.index', ['category' => 'fish-food']) }}" class="text-secondary text-decoration-none">Fish Food</a></li>
+                    <li class="mb-2"><a href="{{ route('products.index', ['category' => 'equipment']) }}" class="text-secondary text-decoration-none">Equipment</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-2">
+                <h6 class="fw-semibold mb-3 small">Care</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="{{ route('care.index') }}" class="text-secondary text-decoration-none">Care Guides</a></li>
+                    <li class="mb-2"><a href="{{ route('community.index') }}" class="text-secondary text-decoration-none">Community</a></li>
+                    <li class="mb-2"><a href="{{ route('sitemap.index') }}" class="text-secondary text-decoration-none">Sitemap</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-2">
+                <h6 class="fw-semibold mb-3 small">Account</h6>
+                <ul class="list-unstyled mb-0">
+                    @auth
+                    <li class="mb-2"><a href="{{ route('orders.index') }}" class="text-secondary text-decoration-none">My Orders</a></li>
+                    <li class="mb-2"><a href="{{ route('wishlist.index') }}" class="text-secondary text-decoration-none">Wishlist</a></li>
+                    <li class="mb-2"><a href="{{ route('cart.index') }}" class="text-secondary text-decoration-none">Cart</a></li>
+                    @else
+                    <li class="mb-2"><a href="{{ route('login') }}" class="text-secondary text-decoration-none">Log in</a></li>
+                    <li class="mb-2"><a href="{{ route('register') }}" class="text-secondary text-decoration-none">Register</a></li>
+                    @endauth
+                    <li class="mb-2"><a href="{{ route('password.request') }}" class="text-secondary text-decoration-none">Help</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary my-4" style="opacity:.2">
+        <p class="text-secondary small mb-0 text-center">&copy; {{ date('Y') }} Sordar Agro. All rights reserved.</p>
     </div>
 </footer>
 

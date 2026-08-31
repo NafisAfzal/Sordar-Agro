@@ -94,12 +94,14 @@
         <div class="col-lg-6">
             @if ($hasGallery)
                 @php $first = $galleryImages->first(); @endphp
-                <img id="galleryMain"
-                     src="{{ asset('storage/'.$first->path) }}"
-                     alt="{{ $product->name }}"
-                     class="product-gallery-main"
-                     loading="eager"
-                     decoding="async">
+                <div class="product-gallery-wrap">
+                    <img id="galleryMain"
+                         src="{{ asset('storage/'.$first->path) }}"
+                         alt="{{ $product->name }}"
+                         class="product-gallery-main"
+                         loading="eager"
+                         decoding="async">
+                </div>
                 @if ($galleryImages->count() > 1)
                     <div class="product-gallery-thumbs" role="listbox" aria-label="Product images">
                         @foreach ($galleryImages as $idx => $img)
@@ -116,11 +118,13 @@
                     </div>
                 @endif
             @elseif ($product->thumbnail)
-                <img src="{{ asset('storage/'.$product->thumbnail) }}"
-                     alt="{{ $product->name }}"
-                     class="product-gallery-main"
-                     loading="eager"
-                     decoding="async">
+                <div class="product-gallery-wrap">
+                    <img src="{{ asset('storage/'.$product->thumbnail) }}"
+                         alt="{{ $product->name }}"
+                         class="product-gallery-main"
+                         loading="eager"
+                         decoding="async">
+                </div>
             @else
                 <div class="product-gallery-placeholder" aria-label="{{ $product->name }}">
                     <i class="bi {{ $product->category->icon_class ?? 'bi-water' }}"></i>

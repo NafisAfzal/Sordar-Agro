@@ -9,9 +9,9 @@
 @endphp
 <div class="card product-card h-100">
     <div class="position-relative">
-        <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}">
+        <a href="{{ route('products.show', $product) }}" aria-label="{{ $product->name }}" class="product-thumb-wrap">
             @if ($product->thumbnail)
-                <img src="{{ asset('storage/'.$product->thumbnail) }}" class="card-img-top product-thumb" alt="{{ $product->name }}" loading="{{ $loading ?? 'lazy' }}" decoding="async">
+                <img src="{{ asset('storage/'.$product->thumbnail) }}" class="product-thumb" alt="{{ $product->name }}" loading="{{ $loading ?? 'lazy' }}" decoding="async">
             @else
                 <div class="thumb-placeholder"><i class="bi {{ $product->category->icon_class ?? 'bi-water' }}"></i></div>
             @endif
