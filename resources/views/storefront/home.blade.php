@@ -25,9 +25,34 @@
                     <a href="{{ route('products.index') }}" class="btn btn-sa-outline fw-semibold">Browse all</a>
                 </div>
             </div>
-            <div class="home-hero-visual" aria-hidden="true">
-                <div class="home-hero-img-main">
-                    <img src="{{ asset('storage/products/neon-tetra.webp') }}" alt="" loading="eager" decoding="async">
+            <div class="home-hero-visual">
+                <div class="hero-carousel" role="region" aria-roledescription="carousel" aria-label="Featured aquarium products">
+                    <div class="hero-carousel-viewport">
+                        <div class="hero-carousel-track">
+                            <div class="hero-slide is-active" role="group" aria-roledescription="slide" aria-label="1 of 3">
+                                <div class="home-hero-img-main">
+                                    <img src="{{ asset('storage/products/neon-tetra.webp') }}" alt="Neon Tetra — peaceful schooling fish for planted aquariums" loading="eager" decoding="async">
+                                </div>
+                            </div>
+                            <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="2 of 3">
+                                <div class="home-hero-img-main">
+                                    <img src="{{ asset('storage/products/betta-splendens.webp') }}" alt="Betta Splendens — vibrant centrepiece fish" loading="eager" decoding="async">
+                                </div>
+                            </div>
+                            <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="3 of 3">
+                                <div class="home-hero-img-main">
+                                    <img src="{{ asset('storage/products/java-fern.webp') }}" alt="Java Fern — hardy aquatic plant for beginners" loading="eager" decoding="async">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="hero-carousel-btn hero-carousel-prev" aria-label="Previous slide"><i class="bi bi-chevron-left"></i></button>
+                    <button type="button" class="hero-carousel-btn hero-carousel-next" aria-label="Next slide"><i class="bi bi-chevron-right"></i></button>
+                    <div class="hero-carousel-dots" role="tablist" aria-label="Carousel pagination">
+                        <button type="button" role="tab" aria-label="Go to slide 1" aria-selected="true" data-slide="0" class="is-active"></button>
+                        <button type="button" role="tab" aria-label="Go to slide 2" aria-selected="false" data-slide="1"></button>
+                        <button type="button" role="tab" aria-label="Go to slide 3" aria-selected="false" data-slide="2"></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -151,3 +176,77 @@
         <a href="{{ route('products.index') }}" class="btn btn-sa btn-lg px-5">Shop the collection</a>
     </section>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const carousel = document.querySelector('.hero-carousel');
+    if (!carousel) return;
+    const track = carousel.querySelector('.hero-carousel-track');
+    const slides = carousel.querySelectorAll('.hero-slide');
+    const prevBtn = carousel.querySelector('.hero-carousel-prev');
+    const nextBtn = carousel.querySelector('.hero-carousel-next');
+    const dots = carousel.querySelectorAll('.hero-carousel-dots button');
+    if (!track || slides.length !== 3) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let index = 0;
+    let timer = null;
+    const interval = 2500;
+
+    function update() {
+        track.style.transform = 'translateX(' + (-index * 100) + '%)';
+        slides.forEach((s, i) => {
+            s.classList.toggle('is-active', i === index);
+        });
+        dots.forEach((d, i) => {
+            const active = i === index;
+            d.classList.toggle('is-active', active);
+            d.setAttribute('aria-selected', active ? 'true' : 'false');
+            d.tabIndex = active ? 0 : -1;
+        });
+    }
+
+    function goTo(i) {
+        index = (i + slides.length) % slides.length;
+        update();
+    }
+
+    function next() { goTo(index + 1); }
+    function prev() { goTo(index - 1); }
+
+    function start() {
+        if (prefersReduced) return;
+        stop();
+        timer = setInterval(next, interval);
+    }
+    function stop() {
+        if (timer) { clearInterval(timer); timer = null; }
+    }
+
+    prevBtn.addEventListener('click', function () { prev(); start(); });
+    nextBtn.addEventListener('click', function () { next(); start(); });
+    dots.forEach(function (dot) {
+        dot.addEventListener('click', function () {
+            goTo(parseInt(dot.getAttribute('data-slide'), 10));
+            start();
+        });
+    });
+
+    carousel.addEventListener('mouseenter', stop);
+    carousel.addEventListener('mouseleave', start);
+    carousel.addEventListener('focusin', stop);
+    carousel.addEventListener('focusout', start);
+
+    carousel.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); start(); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); next(); start(); }
+    });
+
+    carousel.setAttribute('tabindex', '0');
+
+    update();
+    start();
+})();
+</script>
+@endpush

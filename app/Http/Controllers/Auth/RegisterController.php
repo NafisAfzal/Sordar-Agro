@@ -14,8 +14,10 @@ use Illuminate\Validation\Rules\Password;
  */
 class RegisterController extends Controller
 {
-    public function show()
+    public function show(Request $request)
     {
+        $this->rememberContinueUrl($request);
+
         return view('auth.register');
     }
 
@@ -45,7 +47,27 @@ class RegisterController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('home')
+        return redirect()->intended(route('home'))
             ->with('success', 'Welcome aboard, '.$user->name.'! Your account is ready.');
+    }
+
+    /**
+     * Preserve a shopper's same-site destination without accepting external
+     * redirect targets from the query string.
+     */
+    private function rememberContinueUrl(Request $request): void
+    {
+        $continue = $request->query('continue');
+
+        if (! is_string($continue) || ! filter_var($continue, FILTER_VALIDATE_URL)) {
+            return;
+        }
+
+        if (parse_url($continue, PHP_URL_HOST) !== $request->getHost()
+            || parse_url($continue, PHP_URL_SCHEME) !== $request->getScheme()) {
+            return;
+        }
+
+        $request->session()->put('url.intended', $continue);
     }
 }

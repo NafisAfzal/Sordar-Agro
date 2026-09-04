@@ -130,7 +130,24 @@ class DashboardController extends Controller
 
         $recentOrders = Order::with('user')->latest()->take(8)->get();
 
+        // ── Operations snapshot — marketplace-wide, period-independent ──
+        $processingOrders = Order::where('status', 'processing')->where('payment_status', 'paid')->count();
+        $outOfStockProducts = DB::table('products')
+            ->leftJoin('product_variants', 'product_variants.product_id', '=', 'products.id')
+            ->groupBy('products.id')
+            ->havingRaw('COALESCE(SUM(product_variants.stock),0) = 0')
+            ->get()->count();
+        // Low stock = 1..5 units across variants (approved products only matter operationally, but show all for visibility)
+        $lowStockProductsCount = DB::table('products')
+            ->leftJoin('product_variants', 'product_variants.product_id', '=', 'products.id')
+            ->groupBy('products.id')
+            ->havingRaw('COALESCE(SUM(product_variants.stock),0) BETWEEN 1 AND 5')
+            ->get()->count();
+
         return view('admin.dashboard', array_merge($allTimeStats, [
+            'processingOrders'     => $processingOrders,
+            'outOfStockProducts'   => $outOfStockProducts,
+            'lowStockProductsCount'=> $lowStockProductsCount,
             'period'             => $period,
             'dateFrom'           => $dateFrom?->format('Y-m-d'),
             'dateTo'             => $dateTo?->format('Y-m-d'),

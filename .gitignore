@@ -40,3 +40,8 @@ yarn-error.log
 !/storage/framework/views/.gitignore
 /storage/logs/*
 !/storage/logs/.gitignore
+
+# Local generated artifacts — never commit (keep repo clean)
+database/*.sqlite
+database/database.sqlite
+/storage/*.png

@@ -22,6 +22,6 @@
         <button class="btn btn-sa w-100">Log in</button>
     </form>
     <p class="text-center mt-3 mb-0 small">
-        New here? <a href="{{ route('register') }}">Create a customer account</a>
+        New here? <a href="{{ route('register', request()->only('continue')) }}">Create a customer account</a>
     </p>
 @endsection

@@ -68,19 +68,19 @@ class Product extends Model
         return $this->total_stock <= 0;
     }
 
-    /** Units of this product sold across paid orders (any of its variants). */
+    /** Units of this product sold across paid, non-cancelled orders (any of its variants). */
     public function unitsSold(): int
     {
         return (int) OrderItem::whereHas('variant', fn (Builder $q) => $q->where('product_id', $this->id))
-            ->whereHas('order', fn (Builder $q) => $q->where('payment_status', 'paid'))
+            ->whereHas('order', fn (Builder $q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))
             ->sum('quantity');
     }
 
-    /** Total marketplace share earned from this product's paid sales, using each sale's snapshotted amount. */
+    /** Total marketplace share earned from this product's paid, non-cancelled sales, using each sale's snapshotted amount. */
     public function marketplaceShareEarned(): float
     {
         return (float) OrderItem::whereHas('variant', fn (Builder $q) => $q->where('product_id', $this->id))
-            ->whereHas('order', fn (Builder $q) => $q->where('payment_status', 'paid'))
+            ->whereHas('order', fn (Builder $q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))
             ->selectRaw('COALESCE(SUM(quantity * marketplace_share_amount), 0) as total')
             ->value('total');
     }

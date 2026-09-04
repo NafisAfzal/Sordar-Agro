@@ -90,15 +90,31 @@
         @endforeach
     </div>
 
-    {{-- ── Pending moderation alert ──────────────────────────────────── --}}
-    @if ($pending_products > 0 || $pending_community > 0)
-        <div class="alert alert-warning">
-            <i class="bi bi-bell"></i>
-            You have
-            @if ($pending_products > 0)<a href="{{ route('admin.products.index') }}">{{ $pending_products }} product(s) awaiting approval</a>@endif
-            @if ($pending_products > 0 && $pending_community > 0) and @endif
-            @if ($pending_community > 0)<a href="{{ route('admin.community.index') }}">{{ $pending_community }} community post(s) to review</a>@endif.
+    {{-- ── Operations snapshot — compact, only shows states that actually exist ── --}}
+    @php $hasOps = ($pending_products>0||$pending_community>0||($processingOrders??0)>0||($lowStockProductsCount??0)>0||($outOfStockProducts??0)>0); @endphp
+    @if($hasOps)
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="fw-bold mb-3"><i class="bi bi-bell"></i> Needs attention</h6>
+            <div class="row g-2 small">
+                @if($pending_products>0)
+                    <div class="col-12 col-md-6 col-lg-3"><a href="{{ route('admin.products.index') }}" class="alert alert-warning py-2 px-3 mb-0 d-flex justify-content-between align-items-center text-decoration-none"><span><i class="bi bi-hourglass-split"></i> {{ $pending_products }} pending approvals</span><i class="bi bi-arrow-right"></i></a></div>
+                @endif
+                @if($pending_community>0)
+                    <div class="col-12 col-md-6 col-lg-3"><a href="{{ route('admin.community.index') }}" class="alert alert-warning py-2 px-3 mb-0 d-flex justify-content-between align-items-center text-decoration-none"><span><i class="bi bi-chat-square-text"></i> {{ $pending_community }} community to review</span><i class="bi bi-arrow-right"></i></a></div>
+                @endif
+                @if(($processingOrders??0)>0)
+                    <div class="col-12 col-md-6 col-lg-3"><a href="{{ route('admin.orders.index', ['status'=>'processing']) }}" class="alert alert-warning py-2 px-3 mb-0 d-flex justify-content-between align-items-center text-decoration-none"><span><i class="bi bi-truck"></i> {{ $processingOrders }} processing order{{ $processingOrders>1?'s':'' }}</span><i class="bi bi-arrow-right"></i></a></div>
+                @endif
+                @if(($lowStockProductsCount??0)>0)
+                    <div class="col-12 col-md-6 col-lg-3"><a href="{{ route('admin.products.inventory') }}" class="alert alert-warning py-2 px-3 mb-0 d-flex justify-content-between align-items-center text-decoration-none"><span><i class="bi bi-box"></i> {{ $lowStockProductsCount }} low-stock (≤5)</span><i class="bi bi-arrow-right"></i></a></div>
+                @endif
+                @if(($outOfStockProducts??0)>0)
+                    <div class="col-12 col-md-6 col-lg-3"><div class="alert alert-danger py-2 px-3 mb-0"><i class="bi bi-exclamation-triangle"></i> {{ $outOfStockProducts }} out of stock</div></div>
+                @endif
+            </div>
         </div>
+    </div>
     @endif
 
     {{-- ── Sales by product ──────────────────────────────────────────── --}}

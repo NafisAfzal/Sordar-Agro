@@ -2,8 +2,7 @@
 @section('title', 'Forgot Password')
 @section('content')
     <h4 class="mb-3 text-center">Reset your password</h4>
-    <p class="text-muted small">Enter your email and we'll send a reset link.
-       (With the log mail driver, the link is written to <code>storage/logs/laravel.log</code>.)</p>
+    <p class="text-muted small">Enter your email and we'll send a reset link if an account exists for it.</p>
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
         <div class="mb-3">

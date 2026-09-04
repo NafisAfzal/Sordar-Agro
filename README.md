@@ -23,8 +23,8 @@ payment flow, simulated courier tracking, care guides, and a community knowledge
 | Role | How it's created | Capabilities |
 |------|------------------|--------------|
 | **Customer** | Self-registers at `/register` | Browse, wishlist, cart, checkout, track orders, contribute to community |
-| **Partner Seller** | Provisioned by an admin (forced password change on first login) | Everything a customer can do **plus** list/manage products (subject to admin approval) |
-| **Administrator** | Seeded only — never creatable through the UI | Approve/reject products, manage inventory, orders & couriers, users, sellers, care guides, community, **sales analytics dashboard** (date-filtered revenue, own vs seller product breakdown, marketplace earnings, best-selling products) |
+| **Partner Seller** | Provisioned by an admin (forced password change on first login) | Everything a customer can do **plus** list/manage products (subject to admin approval) and a **seller analytics dashboard** (gross sales, earnings, units, orders, product performance, low-stock alerts, date-filtered) |
+| **Administrator** | Seeded only — never creatable through the UI | Approve/reject products, manage inventory, orders & couriers, users, sellers, care guides, community, **marketplace-wide analytics** (date-filtered revenue, own vs seller product breakdown, marketplace earnings, best-selling products) + **Needs Attention** operations snapshot |
 
 ---
 
@@ -206,7 +206,7 @@ Run the full suite with:
 php artisan test
 ```
 
-As of this writing the suite has **303 tests (692 assertions)**, all passing, run against an
+As of this writing the suite has **319 tests (731 assertions)**, all passing, run against an
 in-memory SQLite database (configured in `phpunit.xml`).
 
 ### Unit tests (`tests/Unit/`)

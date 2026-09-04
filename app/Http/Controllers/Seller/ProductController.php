@@ -22,7 +22,7 @@ class ProductController extends Controller
         $sellerProductIds = Product::where('seller_id', auth()->id())->pluck('id');
 
         $totals = OrderItem::whereHas('variant', fn ($q) => $q->whereIn('product_id', $sellerProductIds))
-            ->whereHas('order', fn ($q) => $q->where('payment_status', 'paid'))
+            ->whereHas('order', fn ($q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))
             ->selectRaw('COALESCE(SUM(quantity), 0) as units_sold, COALESCE(SUM(quantity * marketplace_share_amount), 0) as share_earned')
             ->first();
 

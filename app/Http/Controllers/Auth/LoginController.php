@@ -9,8 +9,10 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
-    public function show()
+    public function show(Request $request)
     {
+        $this->rememberContinueUrl($request);
+
         return view('auth.login');
     }
 
@@ -53,5 +55,26 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home')->with('success', 'You have been logged out.');
+    }
+
+    /**
+     * Keep shoppers on the same on-site product page after they sign in.
+     * The host check prevents an arbitrary query parameter from becoming an
+     * external redirect target.
+     */
+    private function rememberContinueUrl(Request $request): void
+    {
+        $continue = $request->query('continue');
+
+        if (! is_string($continue) || ! filter_var($continue, FILTER_VALIDATE_URL)) {
+            return;
+        }
+
+        if (parse_url($continue, PHP_URL_HOST) !== $request->getHost()
+            || parse_url($continue, PHP_URL_SCHEME) !== $request->getScheme()) {
+            return;
+        }
+
+        $request->session()->put('url.intended', $continue);
     }
 }

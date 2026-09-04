@@ -18,9 +18,9 @@
                     <div class="card product-card h-100">
                         <a href="{{ route('products.show', $product) }}">
                             @if ($product->thumbnail)
-                                <img src="{{ asset('storage/'.$product->thumbnail) }}" class="card-img-top product-thumb" alt="">
+                                <img src="{{ asset('storage/'.$product->thumbnail) }}" class="card-img-top product-thumb" alt="{{ $product->name }}" loading="lazy" decoding="async">
                             @else
-                                <div class="thumb-placeholder"><i class="bi bi-water"></i></div>
+                                <div class="thumb-placeholder" aria-hidden="true"><i class="bi bi-water"></i></div>
                             @endif
                         </a>
                         <div class="card-body d-flex flex-column">

@@ -192,7 +192,7 @@
                                 </button>
                             </form>
                         @else
-                            <a href="{{ route('login') }}" class="btn btn-sa-outline w-100">Log in to wishlist</a>
+                            <a href="{{ route('login', ['continue' => url()->full()]) }}" class="btn btn-sa-outline w-100">Sign in to save to wishlist</a>
                         @endauth
                     </div>
                 @else
@@ -252,7 +252,8 @@
                             <p class="text-muted small">Administrators shop using a customer/seller account.</p>
                         @endif
                     @else
-                        <a href="{{ route('login') }}" class="btn btn-sa w-100">Log in to buy</a>
+                        <p class="text-muted small mb-2">Keep browsing freely. Sign in only when you are ready to save items to your cart or check out.</p>
+                        <a href="{{ route('login', ['continue' => url()->full()]) }}" class="btn btn-sa w-100">Sign in to add to cart</a>
                     @endauth
                 @endif
 
