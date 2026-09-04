@@ -13,13 +13,13 @@
     ];
 @endphp
 
-    {{-- Hero: compact, aquarium-specific — single dominant visual for balance --}}
+    {{-- Hero: balanced desktop, single-column mobile, infinite seamless carousel --}}
     <section class="home-hero mb-4 mb-md-5">
         <div class="home-hero-inner">
             <div class="home-hero-copy">
                 <p class="home-hero-kicker">Aquarium marketplace · Dhaka, Bangladesh</p>
-                <h1 class="home-hero-title">Build a healthier aquarium.</h1>
-                <p class="home-hero-lead">Healthy fish, aquatic plants, food and equipment — curated for hobbyists, with clear tank-suitability and care information.</p>
+                <h1 class="home-hero-title">Choose fish and plants that fit your tank.</h1>
+                <p class="home-hero-lead">See tank size, temperament and care at a glance — find neon tetras, bettas, Java fern and more.</p>
                 <div class="home-hero-actions">
                     <a href="{{ route('products.index', ['category' => 'fish']) }}" class="btn btn-sa fw-semibold px-4">Shop Fish</a>
                     <a href="{{ route('products.index') }}" class="btn btn-sa-outline fw-semibold">Browse all</a>
@@ -29,19 +29,36 @@
                 <div class="hero-carousel" role="region" aria-roledescription="carousel" aria-label="Featured aquarium products">
                     <div class="hero-carousel-viewport">
                         <div class="hero-carousel-track">
+                            {{-- Clone of last (for seamless previous from 1 → 3) --}}
+                            <div class="hero-slide is-clone" aria-hidden="true" role="group" aria-roledescription="slide" aria-label="3 of 3">
+                                <div class="home-hero-img-main">
+                                    <img src="{{ asset('storage/products/java-fern.webp') }}" alt="" loading="eager" decoding="async" aria-hidden="true">
+                                    <div class="hero-slide-caption" aria-hidden="true"><span class="hero-slide-badge">Plant</span><strong>Java Fern</strong><span>Hardy, low-light plant — easy for first tanks</span></div>
+                                </div>
+                            </div>
                             <div class="hero-slide is-active" role="group" aria-roledescription="slide" aria-label="1 of 3">
                                 <div class="home-hero-img-main">
-                                    <img src="{{ asset('storage/products/neon-tetra.webp') }}" alt="Neon Tetra — peaceful schooling fish for planted aquariums" loading="eager" decoding="async">
+                                    <img src="{{ asset('storage/products/neon-tetra.webp') }}" alt="Neon Tetra — peaceful schooling fish for planted community tanks" loading="eager" decoding="async">
+                                    <div class="hero-slide-caption"><span class="hero-slide-badge">Fish</span><strong>Neon Tetra</strong><span>Peaceful schooling fish for planted community tanks</span></div>
                                 </div>
                             </div>
                             <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="2 of 3">
                                 <div class="home-hero-img-main">
-                                    <img src="{{ asset('storage/products/betta-splendens.webp') }}" alt="Betta Splendens — vibrant centrepiece fish" loading="eager" decoding="async">
+                                    <img src="{{ asset('storage/products/betta-splendens.webp') }}" alt="Betta Splendens — vibrant centrepiece fish, best kept singly in calm water" loading="eager" decoding="async">
+                                    <div class="hero-slide-caption"><span class="hero-slide-badge">Fish</span><strong>Betta Splendens</strong><span>Vibrant centrepiece — best kept singly in calm water</span></div>
                                 </div>
                             </div>
                             <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="3 of 3">
                                 <div class="home-hero-img-main">
-                                    <img src="{{ asset('storage/products/java-fern.webp') }}" alt="Java Fern — hardy aquatic plant for beginners" loading="eager" decoding="async">
+                                    <img src="{{ asset('storage/products/java-fern.webp') }}" alt="Java Fern — hardy low-light plant, easy for beginners" loading="eager" decoding="async">
+                                    <div class="hero-slide-caption"><span class="hero-slide-badge">Plant</span><strong>Java Fern</strong><span>Hardy, low-light plant — easy for first tanks</span></div>
+                                </div>
+                            </div>
+                            {{-- Clone of first (for seamless next from 3 → 1) --}}
+                            <div class="hero-slide is-clone" aria-hidden="true" role="group" aria-roledescription="slide" aria-label="1 of 3">
+                                <div class="home-hero-img-main">
+                                    <img src="{{ asset('storage/products/neon-tetra.webp') }}" alt="" loading="eager" decoding="async" aria-hidden="true">
+                                    <div class="hero-slide-caption" aria-hidden="true"><span class="hero-slide-badge">Fish</span><strong>Neon Tetra</strong><span>Peaceful schooling fish for planted community tanks</span></div>
                                 </div>
                             </div>
                         </div>
@@ -187,33 +204,105 @@
     const prevBtn = carousel.querySelector('.hero-carousel-prev');
     const nextBtn = carousel.querySelector('.hero-carousel-next');
     const dots = carousel.querySelectorAll('.hero-carousel-dots button');
-    if (!track || slides.length !== 3) return;
-
+    // Infinite: [cloneLast, 1,2,3, cloneFirst] = 5
+    if (!track || slides.length !== 5) return;
+    const realCount = 3;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let index = 0;
+    let current = 1; // real 1
+    let isAnimating = false;
     let timer = null;
     const interval = 2500;
 
-    function update() {
-        track.style.transform = 'translateX(' + (-index * 100) + '%)';
-        slides.forEach((s, i) => {
-            s.classList.toggle('is-active', i === index);
-        });
+    function dotIndex() { return (current - 1 + realCount) % realCount; }
+
+    function setTransform(withTransition) {
+        if (prefersReduced) {
+            track.style.transition = 'none';
+        } else {
+            track.style.transition = withTransition ? 'transform 0.45s ease' : 'none';
+        }
+        track.style.transform = 'translateX(' + (-current * 100) + '%)';
+    }
+
+    function updateDots() {
+        const di = dotIndex();
         dots.forEach((d, i) => {
-            const active = i === index;
+            const active = i === di;
             d.classList.toggle('is-active', active);
             d.setAttribute('aria-selected', active ? 'true' : 'false');
             d.tabIndex = active ? 0 : -1;
         });
+        slides.forEach((s, i) => {
+            // only real slides get is-active for a11y, clones never
+            const isRealActive = i === current && i >= 1 && i <= realCount;
+            s.classList.toggle('is-active', isRealActive);
+        });
     }
 
-    function goTo(i) {
-        index = (i + slides.length) % slides.length;
-        update();
+    function jumpTo(idxWithoutTransition) {
+        current = idxWithoutTransition;
+        setTransform(false);
+        // force reflow before restoring transition
+        void track.offsetHeight;
+        if (!prefersReduced) track.style.transition = 'transform 0.45s ease';
+        updateDots();
     }
 
-    function next() { goTo(index + 1); }
-    function prev() { goTo(index - 1); }
+    function goToReal(realIdx) {
+        if (isAnimating) return;
+        if (prefersReduced) {
+            current = realIdx + 1;
+            setTransform(false);
+            updateDots();
+            return;
+        }
+        isAnimating = true;
+        current = realIdx + 1;
+        setTransform(true);
+        updateDots();
+    }
+
+    function next() {
+        if (isAnimating) return;
+        if (prefersReduced) {
+            current = current % realCount + 1;
+            setTransform(false);
+            updateDots();
+            return;
+        }
+        isAnimating = true;
+        current += 1;
+        setTransform(true);
+        updateDots();
+    }
+    function prev() {
+        if (isAnimating) return;
+        if (prefersReduced) {
+            current = (current - 2 + realCount) % realCount + 1;
+            setTransform(false);
+            updateDots();
+            return;
+        }
+        isAnimating = true;
+        current -= 1;
+        setTransform(true);
+        updateDots();
+    }
+
+    track.addEventListener('transitionend', function (e) {
+        if (e.propertyName !== 'transform') return;
+        if (current === 0) {
+            // landed on cloneLast -> snap to real 3
+            jumpTo(realCount);
+            isAnimating = false;
+        } else if (current === realCount + 1) {
+            // landed on cloneFirst -> snap to real 1
+            jumpTo(1);
+            isAnimating = false;
+        } else {
+            isAnimating = false;
+        }
+    });
 
     function start() {
         if (prefersReduced) return;
@@ -228,7 +317,7 @@
     nextBtn.addEventListener('click', function () { next(); start(); });
     dots.forEach(function (dot) {
         dot.addEventListener('click', function () {
-            goTo(parseInt(dot.getAttribute('data-slide'), 10));
+            goToReal(parseInt(dot.getAttribute('data-slide'), 10));
             start();
         });
     });
@@ -245,7 +334,14 @@
 
     carousel.setAttribute('tabindex', '0');
 
-    update();
+    // initial position at real 1 without animation
+    setTransform(false);
+    updateDots();
+    // restore transition for subsequent moves
+    if (!prefersReduced) {
+        void track.offsetHeight;
+        track.style.transition = 'transform 0.45s ease';
+    }
     start();
 })();
 </script>
