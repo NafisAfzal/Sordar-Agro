@@ -102,8 +102,15 @@ class OrderFlowTest extends TestCase
 
         $response = $this->actingAs($customer)->get('/orders');
         $response->assertOk();
-        $response->assertSee('SA-PAGE0');
-        $response->assertSee('SA-PAGE9');
+        // Equal created_at timestamps are unavoidable in this loop, so the
+        // controller uses id as a deterministic tie-breaker (newest first).
+        $response->assertSee('SA-PAGE14');
+        $response->assertSee('SA-PAGE5');
+        $response->assertDontSee('SA-PAGE4');
+
+        $pageTwo = $this->actingAs($customer)->get('/orders?page=2');
+        $pageTwo->assertSee('SA-PAGE4');
+        $pageTwo->assertSee('SA-PAGE0');
     }
 
     public function test_order_status_transitions_through_lifecycle(): void

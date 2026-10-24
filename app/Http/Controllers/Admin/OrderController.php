@@ -13,7 +13,9 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with('user')->latest();
+        $query = Order::with('user')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
 
         if ($status = $request->query('status')) {
             $query->where('status', $status);
