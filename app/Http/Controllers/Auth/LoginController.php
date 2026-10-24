@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
@@ -18,17 +20,35 @@ class LoginController extends Controller
 
     public function store(Request $request)
     {
+        $email = Str::lower((string) $request->input('email'));
+
         $credentials = $request->validate([
             'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
+        $credentials['email'] = $email;
+
+        // Per-email+IP throttle on failed attempts, cleared on success.
+        $throttleKey = 'login:'.$email.'|'.$request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            throw ValidationException::withMessages([
+                'email' => 'Too many login attempts. Please try again in '.$seconds.' seconds.',
+            ]);
+        }
 
         // Block suspended accounts even with correct credentials.
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            RateLimiter::hit($throttleKey, 60);
+
             throw ValidationException::withMessages([
                 'email' => 'These credentials do not match our records.',
             ]);
         }
+
+        RateLimiter::clear($throttleKey);
 
         if (! $request->user()->is_active) {
             Auth::logout();

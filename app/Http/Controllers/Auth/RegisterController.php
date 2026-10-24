@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 /**
@@ -23,6 +24,12 @@ class RegisterController extends Controller
 
     public function store(Request $request)
     {
+        // Store email addresses in lowercase so look-ups are consistent
+        // across case-insensitive (MySQL) and case-sensitive (SQLite) collations.
+        if ($request->has('email')) {
+            $request->request->set('email', Str::lower((string) $request->input('email')));
+        }
+
         $data = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],

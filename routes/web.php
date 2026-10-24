@@ -43,7 +43,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.i
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('sitemap.robots');
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/search/suggestions', [ProductController::class, 'suggestions'])->name('products.suggestions');
+Route::get('/search/suggestions', [ProductController::class, 'suggestions'])->middleware('throttle:suggestions')->name('products.suggestions');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
 Route::get('/care-guides', [CareGuideController::class, 'index'])->name('care.index');
@@ -58,15 +58,15 @@ Route::get('/community', [CommunityController::class, 'index'])->name('community
 */
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'show'])->name('register');
-    Route::post('/register', [RegisterController::class, 'store']);
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:register');
 
     Route::get('/login', [LoginController::class, 'show'])->name('login');
-    Route::post('/login', [LoginController::class, 'store']);
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:login');
 
     Route::get('/forgot-password', [PasswordController::class, 'showForgot'])->name('password.request');
-    Route::post('/forgot-password', [PasswordController::class, 'sendResetLink'])->name('password.email');
+    Route::post('/forgot-password', [PasswordController::class, 'sendResetLink'])->middleware('throttle:password-email')->name('password.email');
     Route::get('/reset-password/{token}', [PasswordController::class, 'showReset'])->name('password.reset');
-    Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->name('password.update');
+    Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->middleware('throttle:password-reset')->name('password.update');
 });
 
 /*
@@ -116,7 +116,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
             Route::post('/checkout', [CheckoutController::class, 'place'])->name('checkout.place');
             Route::get('/payment/{order}', [PaymentController::class, 'show'])->name('payment.show');
-            Route::post('/payment/{order}', [PaymentController::class, 'process'])->name('payment.process');
+            Route::post('/payment/{order}', [PaymentController::class, 'process'])->middleware('throttle:payment')->name('payment.process');
         });
 
         // Orders + tracking
@@ -125,7 +125,7 @@ Route::middleware('auth')->group(function () {
 
         // Community contribution
         Route::get('/community/submit', [CommunityController::class, 'create'])->name('community.create');
-        Route::post('/community/submit', [CommunityController::class, 'store'])->name('community.store');
+        Route::post('/community/submit', [CommunityController::class, 'store'])->middleware('throttle:community')->name('community.store');
     });
 });
 
