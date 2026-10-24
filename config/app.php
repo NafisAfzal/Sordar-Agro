@@ -22,7 +22,7 @@ return [
     ],
 
     // Custom application settings.
-    
+    'allow_demo_seed' => (bool) env('ALLOW_DEMO_SEED', false),
     'whatsapp_number' => env('WHATSAPP_NUMBER', '8801309985363'),
     'payment_number' => env('PAYMENT_NUMBER', '01309985363'),
     ];
