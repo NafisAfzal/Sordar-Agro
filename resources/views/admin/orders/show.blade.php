@@ -28,8 +28,16 @@
                     {{ $order->shipping_name }} · {{ $order->shipping_phone }}<br>
                     {{ $order->shipping_address }}<br>
                     <hr>
-                    Payment: {{ ucfirst($order->payment_method) }} ({{ ucfirst($order->payment_status) }})
+                    Payment: {{ ucfirst($order->payment_method) }}
+                    <span class="badge bg-{{ $order->paymentStatusColor() }}">{{ $order->paymentStatusLabel() }}</span>
                     @if ($order->transaction_id) · Txn <code>{{ $order->transaction_id }}</code>@endif
+                    @if ($order->payment_submitted_at)
+                        <br>Submitted {{ $order->payment_submitted_at->format('d M Y, H:i') }}
+                    @endif
+                    @if ($order->payment_verified_at)
+                        <br>Reviewed {{ $order->payment_verified_at->format('d M Y, H:i') }}
+                        @if ($order->paymentVerifier) by {{ $order->paymentVerifier->name }} @endif
+                    @endif
                 </div>
             </div>
         </div>
@@ -64,6 +72,29 @@
                     </form>
                 </div>
             </div>
+
+            @if ($order->isAwaitingPaymentVerification())
+                <div class="card border-0 shadow-sm mt-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold">Payment verification</h6>
+                        <p class="small text-muted">
+                            Confirm the TrxID matches a real transfer before accepting this order.
+                            Rejecting releases the stock reserved for it.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <form method="POST" action="{{ route('admin.orders.payment.verify', $order) }}" class="flex-fill">
+                                @csrf @method('PATCH')
+                                <button class="btn btn-success w-100"><i class="bi bi-check2-circle"></i> Verify payment</button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.orders.payment.reject', $order) }}" class="flex-fill"
+                                  onsubmit="return confirm('Reject this payment and release the reserved stock?')">
+                                @csrf @method('PATCH')
+                                <button class="btn btn-outline-danger w-100"><i class="bi bi-x-circle"></i> Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 @endsection

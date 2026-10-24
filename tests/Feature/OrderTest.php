@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OrderTest extends TestCase
@@ -26,7 +27,7 @@ class OrderTest extends TestCase
             'status'           => 'processing',
             'payment_method'   => 'bkash',
             'payment_status'   => 'paid',
-            'transaction_id'   => 'TRX123456',
+            'transaction_id'   => 'TRX'.strtoupper(Str::random(10)),
             'shipping_name'    => 'Buyer',
             'shipping_phone'   => '01700000000',
             'shipping_address' => 'Dhaka',

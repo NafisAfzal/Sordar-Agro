@@ -21,7 +21,7 @@
                             <td class="fw-semibold">{{ $o->order_number }}</td>
                             <td class="small">{{ $o->user->name ?? '—' }}</td>
                             <td>৳{{ number_format($o->total, 2) }}</td>
-                            <td><span class="badge bg-{{ $o->payment_status === 'paid' ? 'success' : ($o->payment_status === 'failed' ? 'danger' : 'secondary') }}">{{ ucfirst($o->payment_status) }}</span></td>
+                            <td><span class="badge bg-{{ $o->paymentStatusColor() }}">{{ $o->paymentStatusLabel() }}</span></td>
                             <td><span class="badge bg-{{ $o->statusColor() }}">{{ ucfirst($o->status) }}</span></td>
                             <td class="small">{{ $o->courier ? ucfirst($o->courier) : '—' }}</td>
                             <td><a href="{{ route('admin.orders.show', $o) }}" class="btn btn-sm btn-outline-secondary">Manage</a></td>

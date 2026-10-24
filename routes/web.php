@@ -177,6 +177,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
+        Route::patch('/orders/{order}/payment/verify', [AdminOrderController::class, 'verifyPayment'])->name('orders.payment.verify');
+        Route::patch('/orders/{order}/payment/reject', [AdminOrderController::class, 'rejectPayment'])->name('orders.payment.reject');
 
         // Care guides (CRUD)
         Route::get('/care-guides', [AdminCareGuideController::class, 'index'])->name('care.index');

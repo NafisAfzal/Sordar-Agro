@@ -60,9 +60,24 @@
                         <hr>
                         <p class="small mb-0">
                             Payment: {{ ucfirst($order->payment_method) }}
-                            ({{ ucfirst($order->payment_status) }})
+                            <span class="badge bg-{{ $order->paymentStatusColor() }}">{{ $order->paymentStatusLabel() }}</span>
                             @if ($order->transaction_id)<br>Txn: <code>{{ $order->transaction_id }}</code>@endif
+                            @if ($order->payment_submitted_at)
+                                <br><span class="text-muted">Submitted {{ $order->payment_submitted_at->format('d M Y, g:i A') }}</span>
+                            @endif
+                            @if ($order->payment_verified_at)
+                                <br><span class="text-muted">Reviewed {{ $order->payment_verified_at->format('d M Y, g:i A') }}</span>
+                            @endif
                         </p>
+                        @if ($order->isAwaitingPaymentVerification())
+                            <div class="alert alert-warning small mt-3 mb-0">
+                                Our team is verifying your transaction. Your items are reserved until then.
+                            </div>
+                        @elseif ($order->payment_status === \App\Models\Order::PAYMENT_UNPAID)
+                            <a href="{{ route('payment.show', $order) }}" class="btn btn-sm btn-warning mt-3">Complete payment</a>
+                        @elseif ($order->payment_status === \App\Models\Order::PAYMENT_FAILED)
+                            <a href="{{ route('payment.show', $order) }}" class="btn btn-sm btn-outline-warning mt-3">Submit a new transaction ID</a>
+                        @endif
                     </div>
                 </div>
             </div>
