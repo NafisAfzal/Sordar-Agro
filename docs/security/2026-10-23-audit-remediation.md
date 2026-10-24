@@ -16,7 +16,7 @@ implementing the fixes.
 | `npm audit --audit-level=high` | 0 vulnerabilities |
 | `php -l` on changed PHP files | No syntax errors |
 | Docker image build | Covered by the new CI workflow (Docker is not installed on the local audit machine) |
-| E2E suite | Updated for the admin-verification flow; run locally/CI with a browser |
+| E2E checkout spec | **7/7 passed** on desktop Chromium (cart, checkout validation, full payment-verification journey) |
 
 ## Audit findings
 
