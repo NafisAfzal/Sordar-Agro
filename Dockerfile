@@ -5,7 +5,6 @@ FROM php:8.4-cli
 # Runtime tools + PHP extensions. `gosu` lets the boot script drop privileges
 # before running migrations/caches; `supervisor` owns the web and queue workers.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        bcmath \
         curl \
         git \
         gosu \
