@@ -36,6 +36,12 @@ Record PASS or FAIL and the date tested.
 
 \- \[ ] Complete checkout with a valid transaction ID
 
+\- \[ ] Submitting the TrxID reserves stock and shows "Awaiting verification"
+
+\- \[ ] Admin can verify the payment (order becomes paid)
+
+\- \[ ] Admin rejection releases the reserved stock
+
 \- \[ ] View order in order history
 
 \- \[ ] Add item to wishlist while out of stock
@@ -45,6 +51,10 @@ Record PASS or FAIL and the date tested.
 \## Automated tests
 
 \- \[ ] `php artisan test` — all tests pass
+
+\- \[ ] `composer audit` — no advisories
+
+\- \[ ] `npm audit --audit-level=high` — no high/critical advisories
 
 
 
