@@ -22,9 +22,14 @@ $orders = Order::query()
 
 foreach ($orders as $order) {
     DB::transaction(function () use ($order) {
-        // Only PAID orders decremented stock at payment time — restoring
-        // unpaid orders would inflate stock (unpaid never touched it).
-        if ($order->payment_status === 'paid') {
+        // Stock is reserved when a TrxID is submitted (unpaid + transaction_id)
+        // and when a payment is verified (paid). Failed orders were already
+        // released by the admin rejection/cancellation path, so restoring them
+        // here would inflate stock.
+        $stockReserved = $order->payment_status === 'paid'
+            || ($order->payment_status === 'unpaid' && $order->transaction_id !== null);
+
+        if ($stockReserved) {
             foreach ($order->items as $item) {
                 if ($item->variant) {
                     $item->variant->increment('stock', $item->quantity);
