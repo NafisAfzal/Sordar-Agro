@@ -21,9 +21,24 @@ class OrderController extends Controller
             $query->where('status', $status);
         }
 
+        // Dedicated queue for admin payment verification. "Pending" means a
+        // TrxID has been submitted but the money hasn't been confirmed yet.
+        $pendingPayment = $request->query('payment') === 'pending';
+
+        if ($pendingPayment) {
+            $query->where('payment_status', Order::PAYMENT_UNPAID)
+                ->whereNotNull('transaction_id')
+                ->where('status', '!=', 'cancelled');
+        }
+
         $orders = $query->paginate(15)->withQueryString();
 
-        return view('admin.orders.index', compact('orders'));
+        $pendingPaymentCount = Order::where('payment_status', Order::PAYMENT_UNPAID)
+            ->whereNotNull('transaction_id')
+            ->where('status', '!=', 'cancelled')
+            ->count();
+
+        return view('admin.orders.index', compact('orders', 'pendingPaymentCount', 'pendingPayment'));
     }
 
     public function show(Order $order)

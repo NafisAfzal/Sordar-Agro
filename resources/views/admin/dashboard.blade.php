@@ -91,7 +91,7 @@
     </div>
 
     {{-- ── Operations snapshot — compact, only shows states that actually exist ── --}}
-    @php $hasOps = ($pending_products>0||$pending_community>0||($processingOrders??0)>0||($lowStockProductsCount??0)>0||($outOfStockProducts??0)>0); @endphp
+    @php $hasOps = ($pending_products>0||$pending_community>0||($pendingPayments??0)>0||($processingOrders??0)>0||($lowStockProductsCount??0)>0||($outOfStockProducts??0)>0); @endphp
     @if($hasOps)
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
@@ -102,6 +102,9 @@
                 @endif
                 @if($pending_community>0)
                     <div class="col-12 col-md-6 col-lg-3"><a href="{{ route('admin.community.index') }}" class="alert alert-warning py-2 px-3 mb-0 d-flex justify-content-between align-items-center text-decoration-none"><span><i class="bi bi-chat-square-text"></i> {{ $pending_community }} community to review</span><i class="bi bi-arrow-right"></i></a></div>
+                @endif
+                @if(($pendingPayments??0)>0)
+                    <div class="col-12 col-md-6 col-lg-3"><a href="{{ route('admin.orders.index', ['payment'=>'pending']) }}" class="alert alert-danger py-2 px-3 mb-0 d-flex justify-content-between align-items-center text-decoration-none"><span><i class="bi bi-cash-coin"></i> {{ $pendingPayments }} payment{{ $pendingPayments>1?'s':'' }} to verify</span><i class="bi bi-arrow-right"></i></a></div>
                 @endif
                 @if(($processingOrders??0)>0)
                     <div class="col-12 col-md-6 col-lg-3"><a href="{{ route('admin.orders.index', ['status'=>'processing']) }}" class="alert alert-warning py-2 px-3 mb-0 d-flex justify-content-between align-items-center text-decoration-none"><span><i class="bi bi-truck"></i> {{ $processingOrders }} processing order{{ $processingOrders>1?'s':'' }}</span><i class="bi bi-arrow-right"></i></a></div>

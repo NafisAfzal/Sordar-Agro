@@ -216,6 +216,30 @@ class PaymentVerificationTest extends TestCase
         $this->assertSame(5, $order->items()->first()->variant->fresh()->stock);
     }
 
+    public function test_admin_can_filter_orders_awaiting_payment_verification(): void
+    {
+        $pendingCustomer = User::factory()->create();
+        $pendingOrder = $this->placeOrder($pendingCustomer);
+        $this->actingAs($pendingCustomer)
+            ->post("/payment/{$pendingOrder->id}", ['transaction_id' => 'TRXPENDING1']);
+
+        $unpaidCustomer = User::factory()->create();
+        $unpaidOrder = $this->placeOrder($unpaidCustomer); // no TrxID submitted
+
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->get('/admin/orders?payment=pending')
+            ->assertOk()
+            ->assertSee($pendingOrder->order_number)
+            ->assertDontSee($unpaidOrder->order_number);
+
+        $this->actingAs($admin)
+            ->get('/admin')
+            ->assertOk()
+            ->assertSee('1 payment to verify');
+    }
+
     public function test_cancelled_orders_cannot_be_paid_and_do_not_reserve_stock(): void
     {
         $customer = User::factory()->create();

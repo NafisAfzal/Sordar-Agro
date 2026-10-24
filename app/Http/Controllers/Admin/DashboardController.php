@@ -132,6 +132,10 @@ class DashboardController extends Controller
 
         // ── Operations snapshot — marketplace-wide, period-independent ──
         $processingOrders = Order::where('status', 'processing')->where('payment_status', 'paid')->count();
+        $pendingPayments = Order::where('payment_status', Order::PAYMENT_UNPAID)
+            ->whereNotNull('transaction_id')
+            ->where('status', '!=', 'cancelled')
+            ->count();
         $outOfStockProducts = DB::table('products')
             ->leftJoin('product_variants', 'product_variants.product_id', '=', 'products.id')
             ->groupBy('products.id')
@@ -146,6 +150,7 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', array_merge($allTimeStats, [
             'processingOrders'     => $processingOrders,
+            'pendingPayments'      => $pendingPayments,
             'outOfStockProducts'   => $outOfStockProducts,
             'lowStockProductsCount'=> $lowStockProductsCount,
             'period'             => $period,
