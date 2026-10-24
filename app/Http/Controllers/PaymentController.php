@@ -25,6 +25,11 @@ class PaymentController extends Controller
     {
         $this->authorizeOwner($order);
 
+        if ($order->status === 'cancelled') {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'This order has been cancelled, so it cannot be paid.');
+        }
+
         if ($order->isPaid()) {
             return redirect()->route('orders.show', $order)
                 ->with('info', 'This order has already been paid.');
@@ -41,6 +46,11 @@ class PaymentController extends Controller
     public function process(Request $request, Order $order, InventoryService $inventory)
     {
         $this->authorizeOwner($order);
+
+        if ($order->status === 'cancelled') {
+            return redirect()->route('orders.show', $order)
+                ->with('error', 'This order has been cancelled, so it cannot be paid.');
+        }
 
         if ($order->isPaid()) {
             return redirect()->route('orders.show', $order)
@@ -78,6 +88,10 @@ class PaymentController extends Controller
                 // Lock the order so two tabs cannot both reserve stock for it.
                 $locked = Order::whereKey($order->getKey())->lockForUpdate()->firstOrFail();
 
+                if ($locked->status === 'cancelled') {
+                    throw new \LogicException('order_cancelled');
+                }
+
                 if ($locked->isPaid() || $locked->isAwaitingPaymentVerification()) {
                     throw new \LogicException('already_processed');
                 }
@@ -107,6 +121,11 @@ class PaymentController extends Controller
                 Cart::where('user_id', $locked->user_id)->delete();
             });
         } catch (\LogicException $e) {
+            if ($e->getMessage() === 'order_cancelled') {
+                return redirect()->route('orders.show', $order)
+                    ->with('error', 'This order has been cancelled, so it cannot be paid.');
+            }
+
             return redirect()->route('orders.show', $order)
                 ->with('info', 'Your payment details are already awaiting admin verification.');
         } catch (QueryException $e) {

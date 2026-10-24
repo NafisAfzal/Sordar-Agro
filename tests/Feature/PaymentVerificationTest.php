@@ -216,6 +216,27 @@ class PaymentVerificationTest extends TestCase
         $this->assertSame(5, $order->items()->first()->variant->fresh()->stock);
     }
 
+    public function test_cancelled_orders_cannot_be_paid_and_do_not_reserve_stock(): void
+    {
+        $customer = User::factory()->create();
+        $order = $this->placeOrder($customer);
+        $variant = $order->items()->first()->variant;
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->patch("/admin/orders/{$order->id}", ['status' => 'cancelled'])
+            ->assertRedirect();
+
+        $this->actingAs($customer)->post("/payment/{$order->id}", ['transaction_id' => 'TRXCANCELLED'])
+            ->assertRedirect(route('orders.show', $order));
+
+        $order->refresh();
+
+        $this->assertSame('cancelled', $order->status);
+        $this->assertNull($order->transaction_id);
+        $this->assertSame(5, $variant->fresh()->stock);
+    }
+
     public function test_cancelling_a_pending_order_releases_reserved_stock_only_once(): void
     {
         $customer = User::factory()->create();
