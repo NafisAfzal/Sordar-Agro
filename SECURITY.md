@@ -76,5 +76,30 @@ without written permission.
 - [ ] `QUEUE_CONNECTION=database` and a running queue worker
       (the Docker image runs one under Supervisor)
 - [ ] HTTPS terminated at the proxy, with HSTS observed on the first response
+- [ ] Duplicate non-null `orders.transaction_id` rows resolved **before** running
+      the payment-verification migration (see below)
 - [ ] `php artisan migrate --force` run during deploy
 - [ ] Backups and log retention configured by the hosting provider
+
+## Upgrading an existing installation
+
+The payment-verification migration adds a **unique index** on
+`orders.transaction_id`. Existing rows are otherwise left unchanged: orders
+already marked `paid` stay paid, and orders that are `unpaid` with a TrxID are
+treated as pending verification.
+
+Before deploying to a database that already has orders, check for duplicates:
+
+```sql
+SELECT transaction_id, COUNT(*) AS uses
+FROM orders
+WHERE transaction_id IS NOT NULL
+GROUP BY transaction_id
+HAVING COUNT(*) > 1;
+```
+
+If any rows are returned, investigate and resolve them manually (the TrxID
+belongs to one real transfer) **before** running the migration. The unique
+index intentionally allows multiple `NULL` values, so unpaid orders without a
+TrxID are unaffected. On MySQL, also make sure the application user has
+`ALTER`/index-creation privileges for the migration.

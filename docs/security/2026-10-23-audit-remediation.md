@@ -10,7 +10,7 @@ implementing the fixes.
 
 | Check | Result |
 |-------|--------|
-| `php artisan test` | **347 passed**, 913 assertions (SQLite in-memory) |
+| `php artisan test` | **348 passed**, 918 assertions (SQLite in-memory) |
 | `composer audit` | No security advisories |
 | `composer validate --strict` | Valid |
 | `npm audit --audit-level=high` | 0 vulnerabilities |
@@ -200,6 +200,7 @@ production requirements.
 | Hot dashboard/catalogue queries lacked composite indexes | Added indexes for orders, products, community, users, care guides, wishlists |
 | Rejected/cancelled payments could strand reserved stock | Rejection and cancellation release stock and restore notifications |
 | Cancelled orders could still be paid and reserve new stock | Payment show/process (and the locked transaction re-check) reject cancelled orders |
+| Pending payments were hard to find for admins | Added a **Payment pending** order filter with a count and a dashboard “Needs attention” alert |
 | E2E cleanup only restored stock for `paid` orders | Updated for the new reserved-stock state |
 | Container had no healthcheck or queue worker | Added `/up` healthcheck and Supervisor queue program |
 | Public seed media lost behind a Railway volume | Preserved in `/app/seed-storage` and restored on boot |
@@ -233,3 +234,24 @@ npm ci
 npm audit --audit-level=high
 docker build -t sordar-agro .
 ```
+
+## Deployment notes for existing databases
+
+The payment-verification migration
+(`2026_10_23_000001_add_payment_verification_to_orders_table.php`) adds a unique
+index on `orders.transaction_id`. Before running it against an existing
+database, check for duplicates:
+
+```sql
+SELECT transaction_id, COUNT(*) AS uses
+FROM orders
+WHERE transaction_id IS NOT NULL
+GROUP BY transaction_id
+HAVING COUNT(*) > 1;
+```
+
+Resolve any duplicate rows manually before deploying — each TrxID belongs to a
+single transfer. Multiple `NULL` values are allowed. Existing `paid` orders keep
+their status; existing `unpaid` orders with a TrxID become “Awaiting
+verification” and can be verified or rejected by an admin. See `SECURITY.md`
+for the full deployment checklist.

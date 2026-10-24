@@ -100,6 +100,6 @@ fixes are in `docs/security/2026-10-23-audit-remediation.md`; the main changes a
   support, and made demo seeding refuse to run in production.
 - Added a Supervisor-managed queue worker, container healthcheck, hot-path indexes,
   CI, Dependabot, and `SECURITY.md`.
-- The test suite grew to **347 tests / 913 assertions**, including dedicated
+- The test suite grew to **348 tests / 918 assertions**, including dedicated
   payment-verification, rate-limit, password-session, header, and production-seeding
   tests.
