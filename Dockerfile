@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM php:8.4-cli
+FROM php:8.5-cli
 
 # Runtime tools + PHP extensions. `gosu` lets the boot script drop privileges
 # before running migrations/caches; `supervisor` owns the web and queue workers.
