@@ -19,9 +19,15 @@ class ProductVariant extends Model
         return ['price' => 'decimal:2'];
     }
 
-    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
 
-    public function inStock(): bool { return $this->stock > 0; }
+    public function inStock(): bool
+    {
+        return $this->stock > 0;
+    }
 
     /** Human label: fish sizes are title-cased; "standard" hides itself. */
     public function getLabelAttribute(): string

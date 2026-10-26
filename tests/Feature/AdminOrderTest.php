@@ -5,9 +5,9 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AdminOrderTest extends TestCase
@@ -21,25 +21,25 @@ class AdminOrderTest extends TestCase
         $variant = $product->variants()->first();
 
         $order = Order::create(array_merge([
-            'order_number'     => 'SA-TEST001',
-            'user_id'          => $customer->id,
-            'total'            => 400,
-            'status'           => 'processing',
-            'payment_method'   => 'bkash',
-            'payment_status'   => 'paid',
-            'transaction_id'   => 'TRX123456',
-            'shipping_name'    => 'Buyer',
-            'shipping_phone'   => '01700000000',
+            'order_number' => 'SA-TEST001',
+            'user_id' => $customer->id,
+            'total' => 400,
+            'status' => 'processing',
+            'payment_method' => 'bkash',
+            'payment_status' => 'paid',
+            'transaction_id' => 'TRX'.strtoupper(Str::random(10)),
+            'shipping_name' => 'Buyer',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'Dhaka',
         ], $overrides));
 
         OrderItem::create([
-            'order_id'           => $order->id,
+            'order_id' => $order->id,
             'product_variant_id' => $variant->id,
-            'product_name'       => $product->name,
-            'variant_size'       => $variant->label,
-            'price'              => $variant->price,
-            'quantity'           => 2,
+            'product_name' => $product->name,
+            'variant_size' => $variant->label,
+            'price' => $variant->price,
+            'quantity' => 2,
             'marketplace_share_amount' => $product->profit_share_amount,
         ]);
 
@@ -92,7 +92,7 @@ class AdminOrderTest extends TestCase
         $order = $this->createPaidOrder(['status' => 'processing']);
 
         $response = $this->actingAs($admin)->patch("/admin/orders/{$order->id}", [
-            'status'  => 'shipped',
+            'status' => 'shipped',
             'courier' => 'pathao',
         ]);
 
@@ -109,8 +109,8 @@ class AdminOrderTest extends TestCase
         $order = $this->createPaidOrder(['status' => 'processing']);
 
         $response = $this->actingAs($admin)->patch("/admin/orders/{$order->id}", [
-            'status'        => 'shipped',
-            'courier'       => 'steadfast',
+            'status' => 'shipped',
+            'courier' => 'steadfast',
             'tracking_code' => 'CUSTOM-TRACK-123',
         ]);
 
@@ -168,7 +168,7 @@ class AdminOrderTest extends TestCase
         $order = $this->createPaidOrder();
 
         $response = $this->actingAs($admin)->patch("/admin/orders/{$order->id}", [
-            'status'  => 'shipped',
+            'status' => 'shipped',
             'courier' => 'invalid_courier',
         ]);
 
@@ -183,7 +183,7 @@ class AdminOrderTest extends TestCase
         $order = $this->createPaidOrder();
 
         $response = $this->actingAs($admin)->patch("/admin/orders/{$order->id}", [
-            'status'        => 'shipped',
+            'status' => 'shipped',
             'tracking_code' => 'SOME-CODE',
         ]);
 

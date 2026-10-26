@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -60,7 +60,7 @@ class FailurePathTest extends TestCase
         $variant = $product->variants()->first();
 
         $this->actingAs($customer)->post("/cart/{$variant->id}", ['quantity' => 1]);
-        $cart = \App\Models\Cart::where('user_id', $customer->id)->first();
+        $cart = Cart::where('user_id', $customer->id)->first();
 
         $response = $this->actingAs($customer)->patch("/cart/{$cart->id}", ['quantity' => 0]);
         $response->assertSessionHasErrors('quantity');
@@ -73,7 +73,7 @@ class FailurePathTest extends TestCase
         $variant = $product->variants()->first();
 
         $this->actingAs($customer)->post("/cart/{$variant->id}", ['quantity' => 1]);
-        $cart = \App\Models\Cart::where('user_id', $customer->id)->first();
+        $cart = Cart::where('user_id', $customer->id)->first();
 
         $response = $this->actingAs($customer)->patch("/cart/{$cart->id}", ['quantity' => -1]);
         $response->assertSessionHasErrors('quantity');

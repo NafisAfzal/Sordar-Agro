@@ -13,11 +13,11 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $fishCat   = Category::where('slug', 'fish')->first();
-        $plantCat  = Category::where('slug', 'aquatic-plants')->first();
-        $foodCat   = Category::where('slug', 'fish-food')->first();
-        $equipCat  = Category::where('slug', 'equipment')->first();
-        $seller    = User::where('role', 'seller')->first();
+        $fishCat = Category::where('slug', 'fish')->first();
+        $plantCat = Category::where('slug', 'aquatic-plants')->first();
+        $foodCat = Category::where('slug', 'fish-food')->first();
+        $equipCat = Category::where('slug', 'equipment')->first();
+        $seller = User::where('role', 'seller')->first();
 
         // ---- Fish products: sold in pairs, three size variants -----------
         $fish = [
@@ -67,15 +67,15 @@ class ProductSeeder extends Seeder
             $product = Product::updateOrCreate(
                 ['slug' => Str::slug($f['name'])],
                 [
-                    'seller_id'   => null, // marketplace-listed
+                    'seller_id' => null, // marketplace-listed
                     'category_id' => $fishCat->id,
-                    'name'        => $f['name'],
+                    'name' => $f['name'],
                     'description' => $f['desc'],
-                    'thumbnail'   => 'products/'.Str::slug($f['name']).'.webp',
-                    'is_fish'     => true,
+                    'thumbnail' => 'products/'.Str::slug($f['name']).'.webp',
+                    'is_fish' => true,
                     'min_tank_size_litres' => $f['tank'],
                     'temperament' => $f['temperament'],
-                    'status'      => 'approved',
+                    'status' => 'approved',
                     'is_featured' => $f['featured'],
                 ]
             );
@@ -103,13 +103,13 @@ class ProductSeeder extends Seeder
             $product = Product::updateOrCreate(
                 ['slug' => Str::slug($name)],
                 [
-                    'seller_id'   => $seller?->id,
+                    'seller_id' => $seller?->id,
                     'category_id' => $cat->id,
-                    'name'        => $name,
+                    'name' => $name,
                     'description' => $desc,
-                    'thumbnail'   => 'products/'.Str::slug($name).'.webp',
-                    'is_fish'     => false,
-                    'status'      => 'approved',
+                    'thumbnail' => 'products/'.Str::slug($name).'.webp',
+                    'is_fish' => false,
+                    'status' => 'approved',
                     'is_featured' => $featured,
                 ]
             );
@@ -124,15 +124,15 @@ class ProductSeeder extends Seeder
         $pending = Product::updateOrCreate(
             ['slug' => 'cardinal-tetra'],
             [
-                'seller_id'   => $seller?->id,
+                'seller_id' => $seller?->id,
                 'category_id' => $fishCat->id,
-                'name'        => 'Cardinal Tetra',
+                'name' => 'Cardinal Tetra',
                 'description' => 'Deep red-and-blue schooling fish, similar to neons but more vivid.',
-                'thumbnail'   => 'products/cardinal-tetra.webp',
-                'is_fish'     => true,
+                'thumbnail' => 'products/cardinal-tetra.webp',
+                'is_fish' => true,
                 'min_tank_size_litres' => 60,
                 'temperament' => 'peaceful',
-                'status'      => 'pending',
+                'status' => 'pending',
                 'is_featured' => false,
             ]
         );

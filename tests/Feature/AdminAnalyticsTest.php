@@ -24,15 +24,15 @@ class AdminAnalyticsTest extends TestCase
         $variant = $product->variants()->first();
 
         $order = Order::create([
-            'order_number'     => 'SA-'.$trx,
-            'user_id'          => $customer->id,
-            'total'            => $variant->price * $qty,
-            'status'           => 'processing',
-            'payment_method'   => 'bkash',
-            'payment_status'   => 'paid',
-            'transaction_id'   => $trx,
-            'shipping_name'    => 'Buyer',
-            'shipping_phone'   => '01700000000',
+            'order_number' => 'SA-'.$trx,
+            'user_id' => $customer->id,
+            'total' => $variant->price * $qty,
+            'status' => 'processing',
+            'payment_method' => 'bkash',
+            'payment_status' => 'paid',
+            'transaction_id' => $trx,
+            'shipping_name' => 'Buyer',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'Dhaka',
         ]);
 
@@ -41,12 +41,12 @@ class AdminAnalyticsTest extends TestCase
         }
 
         OrderItem::create([
-            'order_id'                 => $order->id,
-            'product_variant_id'       => $variant->id,
-            'product_name'             => $product->name,
-            'variant_size'             => $variant->label,
-            'price'                    => $variant->price,
-            'quantity'                 => $qty,
+            'order_id' => $order->id,
+            'product_variant_id' => $variant->id,
+            'product_name' => $product->name,
+            'variant_size' => $variant->label,
+            'price' => $variant->price,
+            'quantity' => $qty,
             'marketplace_share_amount' => $product->profit_share_amount ?? 0,
         ]);
 

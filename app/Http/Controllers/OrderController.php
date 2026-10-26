@@ -10,7 +10,8 @@ class OrderController extends Controller
     {
         $orders = Order::where('user_id', auth()->id())
             ->withCount('items')
-            ->latest()
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(10);
 
         return view('orders.index', compact('orders'));

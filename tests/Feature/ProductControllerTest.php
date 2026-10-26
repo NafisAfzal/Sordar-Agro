@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,9 +18,9 @@ class ProductControllerTest extends TestCase
 
         // Product A: Peaceful fish, small tank, cheap
         $productA = Product::factory()->create([
-            'name'        => 'Neon Tetra',
+            'name' => 'Neon Tetra',
             'category_id' => $fishCategory->id,
-            'status'      => 'approved',
+            'status' => 'approved',
             'temperament' => 'peaceful',
             'min_tank_size_litres' => 20,
         ]);
@@ -31,9 +30,9 @@ class ProductControllerTest extends TestCase
 
         // Product B: Aggressive fish, larger tank, mid price
         $productB = Product::factory()->create([
-            'name'        => 'Oscar Cichlid',
+            'name' => 'Oscar Cichlid',
             'category_id' => $fishCategory->id,
-            'status'      => 'approved',
+            'status' => 'approved',
             'temperament' => 'aggressive',
             'min_tank_size_litres' => 200,
         ]);
@@ -43,9 +42,9 @@ class ProductControllerTest extends TestCase
 
         // Product C: Plant, no temperament, standard variant
         $productC = Product::factory()->create([
-            'name'        => 'Java Fern',
+            'name' => 'Java Fern',
             'category_id' => $plantCategory->id,
-            'status'      => 'approved',
+            'status' => 'approved',
             'temperament' => null,
             'min_tank_size_litres' => null,
         ]);
@@ -53,9 +52,9 @@ class ProductControllerTest extends TestCase
 
         // Product D: Pending (not approved) - should not appear
         $productD = Product::factory()->create([
-            'name'        => 'Pending Product',
+            'name' => 'Pending Product',
             'category_id' => $fishCategory->id,
-            'status'      => 'pending',
+            'status' => 'pending',
             'temperament' => 'peaceful',
             'min_tank_size_litres' => 20,
         ]);
@@ -63,9 +62,9 @@ class ProductControllerTest extends TestCase
 
         // Product E: Out of stock
         $productE = Product::factory()->create([
-            'name'        => 'Out of Stock Fish',
+            'name' => 'Out of Stock Fish',
             'category_id' => $fishCategory->id,
-            'status'      => 'approved',
+            'status' => 'approved',
             'temperament' => 'peaceful',
             'min_tank_size_litres' => 20,
         ]);
@@ -273,7 +272,7 @@ class ProductControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonStructure([
-            '*' => ['name', 'url', 'price', 'category']
+            '*' => ['name', 'url', 'price', 'category'],
         ]);
         $this->assertStringContainsString($productA->name, $response->getContent());
     }
@@ -318,7 +317,7 @@ class ProductControllerTest extends TestCase
         $fishCategory = Category::factory()->create(['name' => 'Fish', 'slug' => 'fish']);
         $product = Product::factory()->create([
             'category_id' => $fishCategory->id,
-            'status'      => 'rejected',
+            'status' => 'rejected',
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'RJ1', 'price' => 100, 'stock' => 5]);
 

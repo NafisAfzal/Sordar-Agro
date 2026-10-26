@@ -29,6 +29,11 @@ class ProfitShareSalesTest extends TestCase
         $order = Order::where('user_id', $customer->id)->orderByDesc('id')->firstOrFail();
         $this->actingAs($customer)->post("/payment/{$order->id}", ['transaction_id' => $transactionId]);
 
+        // A submitted TrxID must be verified by an admin before the sale is
+        // counted as paid in dashboards.
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->patch("/admin/orders/{$order->id}/payment/verify");
+
         return $order->fresh();
     }
 

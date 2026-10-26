@@ -13,11 +13,11 @@ class Product extends Model
     use HasFactory;
 
     public const REJECTION_REASONS = [
-        'profit_share'    => 'Profit Share Amount',
-        'price'           => 'Price',
-        'quantity'        => 'Quantity',
+        'profit_share' => 'Profit Share Amount',
+        'price' => 'Price',
+        'quantity' => 'Quantity',
         'product_quality' => 'Product Quality',
-        'other'           => 'Other',
+        'other' => 'Other',
     ];
 
     protected $fillable = [
@@ -35,14 +35,36 @@ class Product extends Model
         ];
     }
 
-    public function getRouteKeyName(): string { return 'slug'; }
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     // ---- Relationships ------------------------------------------------
-    public function category(): BelongsTo { return $this->belongsTo(Category::class); }
-    public function seller(): BelongsTo   { return $this->belongsTo(User::class, 'seller_id'); }
-    public function variants(): HasMany   { return $this->hasMany(ProductVariant::class); }
-    public function images(): HasMany     { return $this->hasMany(ProductImage::class)->orderBy('sort_order'); }
-    public function wishlists(): HasMany  { return $this->hasMany(Wishlist::class); }
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function seller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 
     // ---- Scopes -------------------------------------------------------
     public function scopeApproved(Builder $q): Builder

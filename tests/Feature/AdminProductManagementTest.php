@@ -20,18 +20,18 @@ class AdminProductManagementTest extends TestCase
         $seller = User::factory()->seller()->create();
         $category = Category::factory()->create();
         $product = Product::factory()->create([
-            'seller_id'   => $seller->id,
-            'status'      => 'approved',
+            'seller_id' => $seller->id,
+            'status' => 'approved',
             'category_id' => $category->id,
-            'name'        => 'Original Name',
+            'name' => 'Original Name',
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'ORIG1', 'price' => 100, 'stock' => 5]);
 
         $this->actingAs($admin)->put("/admin/products/{$product->slug}", [
-            'name'        => 'Edited By Admin',
+            'name' => 'Edited By Admin',
             'category_id' => $category->id,
             'description' => 'Updated description',
-            'variants'    => [
+            'variants' => [
                 ['size' => 'standard', 'price' => 150, 'stock' => 8],
             ],
         ]);
@@ -63,23 +63,23 @@ class AdminProductManagementTest extends TestCase
         $variant = $product->variants()->first();
 
         $order = Order::create([
-            'order_number'     => 'SA-TEST0099',
-            'user_id'          => $customer->id,
-            'total'            => 100,
-            'status'           => 'processing',
-            'payment_method'   => 'bkash',
-            'payment_status'   => 'paid',
-            'shipping_name'    => 'Buyer',
-            'shipping_phone'   => '01700000000',
+            'order_number' => 'SA-TEST0099',
+            'user_id' => $customer->id,
+            'total' => 100,
+            'status' => 'processing',
+            'payment_method' => 'bkash',
+            'payment_status' => 'paid',
+            'shipping_name' => 'Buyer',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'Dhaka',
         ]);
         OrderItem::create([
-            'order_id'           => $order->id,
+            'order_id' => $order->id,
             'product_variant_id' => $variant->id,
-            'product_name'       => $product->name,
-            'variant_size'       => $variant->size,
-            'price'              => $variant->price,
-            'quantity'           => 1,
+            'product_name' => $product->name,
+            'variant_size' => $variant->size,
+            'price' => $variant->price,
+            'quantity' => 1,
         ]);
 
         $response = $this->actingAs($admin)->delete("/admin/products/{$product->slug}");

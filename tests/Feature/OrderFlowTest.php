@@ -26,25 +26,25 @@ class OrderFlowTest extends TestCase
         ]);
 
         $order = Order::create(array_merge([
-            'order_number'     => 'SA-ORD'.rand(1000, 9999),
-            'user_id'          => $customer->id,
-            'total'            => 400,
-            'status'           => 'processing',
-            'payment_method'   => 'bkash',
-            'payment_status'   => 'paid',
-            'transaction_id'   => 'TRX'.rand(100000, 999999),
-            'shipping_name'    => 'Buyer',
-            'shipping_phone'   => '01700000000',
+            'order_number' => 'SA-ORD'.rand(1000, 9999),
+            'user_id' => $customer->id,
+            'total' => 400,
+            'status' => 'processing',
+            'payment_method' => 'bkash',
+            'payment_status' => 'paid',
+            'transaction_id' => 'TRX'.rand(100000, 999999),
+            'shipping_name' => 'Buyer',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'Dhaka',
         ], $overrides));
 
         OrderItem::create([
-            'order_id'           => $order->id,
+            'order_id' => $order->id,
             'product_variant_id' => $variant->id,
-            'product_name'       => $product->name,
-            'variant_size'       => $variant->label,
-            'price'              => $variant->price,
-            'quantity'           => 2,
+            'product_name' => $product->name,
+            'variant_size' => $variant->label,
+            'price' => $variant->price,
+            'quantity' => 2,
             'marketplace_share_amount' => $product->profit_share_amount,
         ]);
 
@@ -102,8 +102,15 @@ class OrderFlowTest extends TestCase
 
         $response = $this->actingAs($customer)->get('/orders');
         $response->assertOk();
-        $response->assertSee('SA-PAGE0');
-        $response->assertSee('SA-PAGE9');
+        // Equal created_at timestamps are unavoidable in this loop, so the
+        // controller uses id as a deterministic tie-breaker (newest first).
+        $response->assertSee('SA-PAGE14');
+        $response->assertSee('SA-PAGE5');
+        $response->assertDontSee('SA-PAGE4');
+
+        $pageTwo = $this->actingAs($customer)->get('/orders?page=2');
+        $pageTwo->assertSee('SA-PAGE4');
+        $pageTwo->assertSee('SA-PAGE0');
     }
 
     public function test_order_status_transitions_through_lifecycle(): void

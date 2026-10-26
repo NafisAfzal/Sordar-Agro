@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 /**
@@ -23,25 +26,31 @@ class RegisterController extends Controller
 
     public function store(Request $request)
     {
+        // Store email addresses in lowercase so look-ups are consistent
+        // across case-insensitive (MySQL) and case-sensitive (SQLite) collations.
+        if ($request->has('email')) {
+            $request->request->set('email', Str::lower((string) $request->input('email')));
+        }
+
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'phone'    => ['nullable', 'string', 'max:20', 'unique:users,phone'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
             'password' => ['required', 'confirmed', Password::min(8)],
         ]);
 
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'phone'    => $data['phone'] ?? null,
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
             'password' => $data['password'],   // hashed via model cast
-            'role'     => 'customer',          // forced — never trust input
+            'role' => 'customer',          // forced — never trust input
         ]);
 
         try {
-            event(new \Illuminate\Auth\Events\Registered($user));
+            event(new Registered($user));
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::warning('Verification email failed to send: '.$e->getMessage());
+            Log::warning('Verification email failed to send: '.$e->getMessage());
         }
 
         Auth::login($user);

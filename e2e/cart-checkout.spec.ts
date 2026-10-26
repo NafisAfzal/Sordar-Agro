@@ -116,7 +116,7 @@ test.describe('Checkout & payment', () => {
         expect(invalid).toBeTruthy();
     });
 
-    test('full journey: place order, submit TrxID, reach confirmation', async ({ page }) => {
+    test('full journey: place order, submit TrxID, reach awaiting verification', async ({ page }) => {
         await page.goto('/checkout');
         await page.fill('#shipping_name', 'E2E Test Customer');
         await page.fill('#shipping_phone', '01700000000');
@@ -139,17 +139,18 @@ test.describe('Checkout & payment', () => {
         await page.click('form[action*="payment"] button.btn-sa');
 
         await page.waitForURL(/\/orders\/\d+$/, { timeout: 10000 });
-        await expect(page.locator('.alert-success').first()).toContainText(/submitted|confirmed/i);
+        await expect(page.locator('.alert-success').first()).toContainText(/received|reserved|verif/i);
 
-        // Order detail reflects paid status.
+        // Submitting a TrxID reserves stock but does NOT mark the order paid.
+        await expect(page.locator('body')).toContainText(/awaiting verification/i);
         await page.goto('/orders');
         await expect(page.locator('body')).toContainText(orderNumber!);
 
-        // Payment page now redirects paid orders to the order detail.
+        // Payment page now redirects orders with a pending TrxID to the detail page.
         await page.goto(paymentUrl);
         await expect(page).toHaveURL(/\/orders\/\d+$/);
 
-        // Cart was cleared after successful payment.
+        // Cart was cleared when the payment details were submitted.
         await page.goto('/cart');
         await expect(page.locator('.cart-empty')).toBeVisible();
     });

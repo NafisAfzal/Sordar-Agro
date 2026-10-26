@@ -185,13 +185,15 @@ class AuthFlowTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_forgot_password_rejects_invalid_email(): void
+    public function test_forgot_password_does_not_reveal_unknown_email(): void
     {
         $response = $this->post('/forgot-password', [
             'email' => 'nonexistent@example.com',
         ]);
 
-        $response->assertSessionHasErrors('email');
+        // Generic response prevents account enumeration.
+        $response->assertSessionHas('success');
+        $response->assertSessionHasNoErrors();
     }
 
     public function test_forgot_password_rejects_empty_email(): void

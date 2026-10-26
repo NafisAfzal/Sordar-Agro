@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\QueuedVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,9 +31,20 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     // ---- Role helpers -------------------------------------------------
-    public function isAdmin(): bool    { return $this->role === 'admin'; }
-    public function isSeller(): bool   { return $this->role === 'seller'; }
-    public function isCustomer(): bool { return $this->role === 'customer'; }
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isSeller(): bool
+    {
+        return $this->role === 'seller';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
+    }
 
     /**
      * Sellers retain all customer (buyer) abilities, and admins can also
@@ -47,21 +59,40 @@ class User extends Authenticatable implements MustVerifyEmail
     public function homeRoute(): string
     {
         return match ($this->role) {
-            'admin'  => 'admin.dashboard',
+            'admin' => 'admin.dashboard',
             'seller' => 'seller.dashboard',
-            default  => 'home',
+            default => 'home',
         };
     }
 
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new \App\Notifications\QueuedVerifyEmail());
+        $this->notify(new QueuedVerifyEmail);
     }
 
     // ---- Relationships ------------------------------------------------
-    public function products(): HasMany { return $this->hasMany(Product::class, 'seller_id'); }
-    public function orders(): HasMany   { return $this->hasMany(Order::class); }
-    public function cartItems(): HasMany { return $this->hasMany(Cart::class); }
-    public function wishlists(): HasMany { return $this->hasMany(Wishlist::class); }
-    public function createdSellers(): HasMany { return $this->hasMany(User::class, 'created_by'); }
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class, 'seller_id');
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function createdSellers(): HasMany
+    {
+        return $this->hasMany(User::class, 'created_by');
+    }
 }

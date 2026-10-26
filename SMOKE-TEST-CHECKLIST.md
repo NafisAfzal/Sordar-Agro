@@ -38,6 +38,8 @@ do NOT consider the deploy successful — investigate immediately.
 
 \- \[ ] Can reach payment page after submitting checkout form
 
+\- \[ ] Submitting a TrxID shows "Awaiting verification" on the order page
+
 
 
 \## Admin
@@ -45,6 +47,10 @@ do NOT consider the deploy successful — investigate immediately.
 \- \[ ] Admin dashboard loads with stats
 
 \- \[ ] Product approvals page loads
+
+\- \[ ] Pending order shows Verify / Reject payment buttons
+
+\- \[ ] Verify payment marks the order paid
 
 
 

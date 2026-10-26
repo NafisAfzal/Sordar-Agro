@@ -32,10 +32,10 @@ class CheckoutController extends Controller
     public function place(Request $request)
     {
         $data = $request->validate([
-            'shipping_name'    => ['required', 'string', 'max:255'],
-            'shipping_phone'   => ['required', 'string', 'max:20'],
+            'shipping_name' => ['required', 'string', 'max:255'],
+            'shipping_phone' => ['required', 'string', 'max:20'],
             'shipping_address' => ['required', 'string', 'max:1000'],
-            'payment_method'   => ['required', 'in:bkash,nagad'],
+            'payment_method' => ['required', 'in:bkash,nagad'],
         ]);
 
         $items = Cart::with('variant.product')->where('user_id', auth()->id())->get();
@@ -54,25 +54,25 @@ class CheckoutController extends Controller
 
         $order = DB::transaction(function () use ($items, $data) {
             $order = Order::create([
-                'order_number'     => 'SA-'.strtoupper(Str::random(8)),
-                'user_id'          => auth()->id(),
-                'total'            => $items->sum(fn ($i) => $i->subtotal()),
-                'status'           => 'processing',
-                'payment_method'   => $data['payment_method'],
-                'payment_status'   => 'unpaid',
-                'shipping_name'    => $data['shipping_name'],
-                'shipping_phone'   => $data['shipping_phone'],
+                'order_number' => 'SA-'.strtoupper(Str::random(8)),
+                'user_id' => auth()->id(),
+                'total' => $items->sum(fn ($i) => $i->subtotal()),
+                'status' => 'processing',
+                'payment_method' => $data['payment_method'],
+                'payment_status' => 'unpaid',
+                'shipping_name' => $data['shipping_name'],
+                'shipping_phone' => $data['shipping_phone'],
                 'shipping_address' => $data['shipping_address'],
             ]);
 
             foreach ($items as $item) {
                 OrderItem::create([
-                    'order_id'           => $order->id,
+                    'order_id' => $order->id,
                     'product_variant_id' => $item->variant->id,
-                    'product_name'       => $item->variant->product->name,
-                    'variant_size'       => $item->variant->label,
-                    'price'              => $item->variant->price,
-                    'quantity'           => $item->quantity,
+                    'product_name' => $item->variant->product->name,
+                    'variant_size' => $item->variant->label,
+                    'price' => $item->variant->price,
+                    'quantity' => $item->quantity,
                     'marketplace_share_amount' => $item->variant->product->profit_share_amount,
                 ]);
             }

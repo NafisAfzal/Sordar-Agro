@@ -15,7 +15,7 @@
 
                 <div class="text-center mb-4">
                     <h3 class="display-6 fw-bold text-{{ $colour }}">{{ $brand }}</h3>
-                    <p class="text-muted mb-0">Complete your payment to confirm the order</p>
+                    <p class="text-muted mb-0">Send the amount, then submit your Transaction ID for verification</p>
                 </div>
 
                 <div class="payment-order-box">
@@ -78,7 +78,7 @@
                     @enderror
                     <div class="alert alert-warning small fw-semibold mb-2 payment-warning">
                         <i class="bi bi-exclamation-circle"></i>
-                        Enter the exact TrxID from your {{ $brand }} confirmation SMS. Your order will be confirmed once the transaction is verified by our team.
+                        Enter the exact TrxID from your {{ $brand }} confirmation SMS. Your items are reserved when you submit, and the order is confirmed once our team verifies the transaction.
                     </div>
                     <button class="btn btn-sa btn-lg w-100">
                         <i class="bi bi-check-circle"></i> Submit payment details

@@ -5,10 +5,18 @@
     <h3 class="mb-4">Orders &amp; delivery</h3>
 
     <ul class="nav nav-pills mb-3">
-        <li class="nav-item"><a class="nav-link {{ !request('status') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}">All</a></li>
+        <li class="nav-item"><a class="nav-link {{ !request('status') && request('payment') !== 'pending' ? 'active' : '' }}" href="{{ route('admin.orders.index') }}">All</a></li>
         @foreach (['processing','shipped','delivered','cancelled'] as $s)
             <li class="nav-item"><a class="nav-link {{ request('status') === $s ? 'active' : '' }}" href="{{ route('admin.orders.index', ['status' => $s]) }}">{{ ucfirst($s) }}</a></li>
         @endforeach
+        <li class="nav-item">
+            <a class="nav-link {{ $pendingPayment ? 'active' : '' }}" href="{{ route('admin.orders.index', ['payment' => 'pending']) }}">
+                Payment pending
+                @if ($pendingPaymentCount > 0)
+                    <span class="badge bg-danger ms-1">{{ $pendingPaymentCount }}</span>
+                @endif
+            </a>
+        </li>
     </ul>
 
     <div class="card border-0 shadow-sm">
@@ -21,7 +29,7 @@
                             <td class="fw-semibold">{{ $o->order_number }}</td>
                             <td class="small">{{ $o->user->name ?? '—' }}</td>
                             <td>৳{{ number_format($o->total, 2) }}</td>
-                            <td><span class="badge bg-{{ $o->payment_status === 'paid' ? 'success' : ($o->payment_status === 'failed' ? 'danger' : 'secondary') }}">{{ ucfirst($o->payment_status) }}</span></td>
+                            <td><span class="badge bg-{{ $o->paymentStatusColor() }}">{{ $o->paymentStatusLabel() }}</span></td>
                             <td><span class="badge bg-{{ $o->statusColor() }}">{{ ucfirst($o->status) }}</span></td>
                             <td class="small">{{ $o->courier ? ucfirst($o->courier) : '—' }}</td>
                             <td><a href="{{ route('admin.orders.show', $o) }}" class="btn btn-sm btn-outline-secondary">Manage</a></td>

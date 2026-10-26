@@ -17,7 +17,7 @@ class ProductController extends Controller
         if ($term = trim((string) $request->query('q'))) {
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', "%{$term}%")
-                  ->orWhere('description', 'like', "%{$term}%");
+                    ->orWhere('description', 'like', "%{$term}%");
             });
         }
 
@@ -56,9 +56,9 @@ class ProductController extends Controller
 
         // Sorting.
         match ($request->query('sort')) {
-            'newest'      => $query->latest(),
-            'name'        => $query->orderBy('name'),
-            default       => $query->latest(),
+            'newest' => $query->latest(),
+            'name' => $query->orderBy('name'),
+            default => $query->latest(),
         };
 
         $products = $query->paginate(12)->withQueryString();
@@ -83,9 +83,9 @@ class ProductController extends Controller
             ->take(8)
             ->get()
             ->map(fn ($p) => [
-                'name'     => $p->name,
-                'url'      => route('products.show', $p),
-                'price'    => number_format($p->starting_price, 2),
+                'name' => $p->name,
+                'url' => route('products.show', $p),
+                'price' => number_format($p->starting_price, 2),
                 'category' => $p->category->name ?? '',
             ]);
 

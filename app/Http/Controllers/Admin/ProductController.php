@@ -31,6 +31,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load('seller', 'category', 'variants', 'images');
+
         return view('admin.products.show', compact('product'));
     }
 
@@ -41,6 +42,7 @@ class ProductController extends Controller
             'admin_feedback' => null,
             'rejection_reason_category' => null,
         ]);
+
         return back()->with('success', "“{$product->name}” approved and now live.");
     }
 
@@ -80,10 +82,10 @@ class ProductController extends Controller
         DB::transaction(function () use ($product, $data, $request) {
             $product->update([
                 'category_id' => $data['category_id'],
-                'name'        => $data['name'],
+                'name' => $data['name'],
                 'description' => $data['description'] ?? null,
-                'thumbnail'   => $this->storeThumb($request) ?? $product->thumbnail,
-                'is_fish'     => $request->boolean('is_fish'),
+                'thumbnail' => $this->storeThumb($request) ?? $product->thumbnail,
+                'is_fish' => $request->boolean('is_fish'),
                 'min_tank_size_litres' => $data['min_tank_size_litres'] ?? null,
                 'temperament' => $data['temperament'] ?? null,
                 // Status is intentionally left untouched: the admin is the
@@ -126,17 +128,17 @@ class ProductController extends Controller
     private function validateProduct(Request $request): array
     {
         return $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'category_id' => ['required', 'exists:categories,id'],
             'description' => ['nullable', 'string'],
-            'thumbnail'   => ['nullable', 'image', 'max:2048'],
-            'is_fish'     => ['nullable', 'boolean'],
+            'thumbnail' => ['nullable', 'image', 'max:2048'],
+            'is_fish' => ['nullable', 'boolean'],
             'min_tank_size_litres' => ['nullable', 'integer', 'min:0'],
             'temperament' => ['nullable', 'in:peaceful,semi-aggressive,aggressive'],
-            'variants'              => ['required', 'array', 'min:1'],
-            'variants.*.size'       => ['required', 'in:small,medium,large,standard'],
-            'variants.*.price'      => ['required', 'numeric', 'min:0'],
-            'variants.*.stock'      => ['required', 'integer', 'min:0'],
+            'variants' => ['required', 'array', 'min:1'],
+            'variants.*.size' => ['required', 'in:small,medium,large,standard'],
+            'variants.*.price' => ['required', 'numeric', 'min:0'],
+            'variants.*.stock' => ['required', 'integer', 'min:0'],
             'variants.*.size_description' => ['nullable', 'string', 'max:500'],
         ]);
     }
@@ -145,12 +147,12 @@ class ProductController extends Controller
     {
         foreach ($request->input('variants', []) as $v) {
             ProductVariant::create([
-                'product_id'       => $product->id,
-                'size'             => $v['size'],
-                'price'            => $v['price'],
-                'stock'            => $v['stock'],
+                'product_id' => $product->id,
+                'size' => $v['size'],
+                'price' => $v['price'],
+                'stock' => $v['stock'],
                 'size_description' => $v['size_description'] ?? null,
-                'sku'              => strtoupper(Str::random(8)),
+                'sku' => strtoupper(Str::random(8)),
             ]);
         }
     }
@@ -160,6 +162,7 @@ class ProductController extends Controller
         if ($request->hasFile('thumbnail')) {
             return $request->file('thumbnail')->store('products', 'public');
         }
+
         return null;
     }
 }

@@ -13,11 +13,25 @@ class Category extends Model
 
     protected $fillable = ['name', 'slug', 'description', 'parent_id'];
 
-    public function products(): HasMany { return $this->hasMany(Product::class); }
-    public function parent(): BelongsTo { return $this->belongsTo(Category::class, 'parent_id'); }
-    public function children(): HasMany { return $this->hasMany(Category::class, 'parent_id'); }
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 
-    public function getRouteKeyName(): string { return 'slug'; }
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     /** Bootstrap Icons class used for this category's thumbnail placeholders and cards. */
     public function getIconClassAttribute(): string

@@ -39,7 +39,7 @@ class ShopFlowTest extends TestCase
         ]);
     }
 
-    public function test_successful_payment_decrements_stock_and_clears_cart(): void
+    public function test_submitting_transaction_id_reserves_stock_and_clears_cart(): void
     {
         $customer = User::factory()->create();
         $product = Product::factory()->withVariant(stock: 5, price: 100)->create();
@@ -62,9 +62,12 @@ class ShopFlowTest extends TestCase
         $order->refresh();
         $variant->refresh();
 
-        $this->assertSame('paid', $order->payment_status);
+        // Submitting a TrxID is only a claim — an admin must verify it.
+        $this->assertSame('unpaid', $order->payment_status);
         $this->assertSame('TRX123456789', $order->transaction_id);
-        $this->assertSame(3, $variant->stock);              // 5 - 2
+        $this->assertNotNull($order->payment_submitted_at);
+        $this->assertNull($order->payment_verified_at);
+        $this->assertSame(3, $variant->stock);              // 5 - 2 reserved
         $this->assertSame(0, Cart::where('user_id', $customer->id)->count());
     }
 

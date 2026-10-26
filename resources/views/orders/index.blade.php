@@ -24,20 +24,18 @@
                                     <div class="small text-muted">{{ $order->created_at->format('d M Y') }} &middot; {{ $order->items_count }} item{{ $order->items_count > 1 ? 's' : '' }}</div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    @if ($order->payment_status === 'paid')
-                                        <span class="badge bg-success">Paid</span>
-                                    @elseif ($order->payment_status === 'failed')
-                                        <span class="badge bg-danger">Failed</span>
-                                    @else
-                                        <span class="badge bg-secondary">Unpaid</span>
-                                    @endif
+                                    <span class="badge bg-{{ $order->paymentStatusColor() }}">{{ $order->paymentStatusLabel() }}</span>
                                     <span class="badge bg-{{ $order->statusColor() }}">{{ ucfirst($order->status) }}</span>
                                     <span class="fw-bold text-sa">৳{{ number_format($order->total, 2) }}</span>
                                 </div>
                             </div>
                             <div class="mt-2">
-                                @if ($order->payment_status === 'unpaid')
+                                @if ($order->isAwaitingPaymentVerification())
+                                    <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-outline-secondary">View verification status</a>
+                                @elseif ($order->payment_status === \App\Models\Order::PAYMENT_UNPAID)
                                     <a href="{{ route('payment.show', $order) }}" class="btn btn-sm btn-warning">Pay now</a>
+                                @elseif ($order->payment_status === \App\Models\Order::PAYMENT_FAILED)
+                                    <a href="{{ route('payment.show', $order) }}" class="btn btn-sm btn-outline-warning">Retry payment</a>
                                 @else
                                     <a href="{{ route('orders.show', $order) }}" class="btn btn-sm btn-outline-secondary">View order</a>
                                 @endif

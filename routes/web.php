@@ -1,37 +1,34 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Admin\CareGuideController as AdminCareGuideController;
 // ---- Auth controllers --------------------------------------------------
-use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Admin\CommunityController as AdminCommunityController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
+// ---- Storefront controllers -------------------------------------------
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\SellerController as AdminSellerController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
-
-// ---- Storefront controllers -------------------------------------------
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SitemapController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\WishlistController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\CareGuideController;
-use App\Http\Controllers\CommunityController;
-
+use App\Http\Controllers\CartController;
 // ---- Seller controllers -----------------------------------------------
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CommunityController;
+// ---- Admin controllers ------------------------------------------------
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Seller\DashboardController as SellerDashboard;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
-
-// ---- Admin controllers ------------------------------------------------
-use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\SellerController as AdminSellerController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\Admin\CareGuideController as AdminCareGuideController;
-use App\Http\Controllers\Admin\CommunityController as AdminCommunityController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\WishlistController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,7 +40,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.i
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('sitemap.robots');
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/search/suggestions', [ProductController::class, 'suggestions'])->name('products.suggestions');
+Route::get('/search/suggestions', [ProductController::class, 'suggestions'])->middleware('throttle:suggestions')->name('products.suggestions');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
 Route::get('/care-guides', [CareGuideController::class, 'index'])->name('care.index');
@@ -58,15 +55,15 @@ Route::get('/community', [CommunityController::class, 'index'])->name('community
 */
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'show'])->name('register');
-    Route::post('/register', [RegisterController::class, 'store']);
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:register');
 
     Route::get('/login', [LoginController::class, 'show'])->name('login');
-    Route::post('/login', [LoginController::class, 'store']);
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:login');
 
     Route::get('/forgot-password', [PasswordController::class, 'showForgot'])->name('password.request');
-    Route::post('/forgot-password', [PasswordController::class, 'sendResetLink'])->name('password.email');
+    Route::post('/forgot-password', [PasswordController::class, 'sendResetLink'])->middleware('throttle:password-email')->name('password.email');
     Route::get('/reset-password/{token}', [PasswordController::class, 'showReset'])->name('password.reset');
-    Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->name('password.update');
+    Route::post('/reset-password', [PasswordController::class, 'resetPassword'])->middleware('throttle:password-reset')->name('password.update');
 });
 
 /*
@@ -82,14 +79,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/change-password', [PasswordController::class, 'updateChange'])->name('password.change.update');
 
     // Email verification
-    Route::get('/email/verify', [App\Http\Controllers\Auth\VerificationController::class, 'notice'])
+    Route::get('/email/verify', [VerificationController::class, 'notice'])
         ->name('verification.notice');
 
-    Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Auth\VerificationController::class, 'verify'])
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
         ->middleware(['signed'])
         ->name('verification.verify');
 
-    Route::post('/email/verification-notification', [App\Http\Controllers\Auth\VerificationController::class, 'resend'])
+    Route::post('/email/verification-notification', [VerificationController::class, 'resend'])
         ->middleware(['throttle:6,1'])
         ->name('verification.send');
 
@@ -116,7 +113,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
             Route::post('/checkout', [CheckoutController::class, 'place'])->name('checkout.place');
             Route::get('/payment/{order}', [PaymentController::class, 'show'])->name('payment.show');
-            Route::post('/payment/{order}', [PaymentController::class, 'process'])->name('payment.process');
+            Route::post('/payment/{order}', [PaymentController::class, 'process'])->middleware('throttle:payment')->name('payment.process');
         });
 
         // Orders + tracking
@@ -125,7 +122,7 @@ Route::middleware('auth')->group(function () {
 
         // Community contribution
         Route::get('/community/submit', [CommunityController::class, 'create'])->name('community.create');
-        Route::post('/community/submit', [CommunityController::class, 'store'])->name('community.store');
+        Route::post('/community/submit', [CommunityController::class, 'store'])->middleware('throttle:community')->name('community.store');
     });
 });
 
@@ -177,6 +174,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
+        Route::patch('/orders/{order}/payment/verify', [AdminOrderController::class, 'verifyPayment'])->name('orders.payment.verify');
+        Route::patch('/orders/{order}/payment/reject', [AdminOrderController::class, 'rejectPayment'])->name('orders.payment.reject');
 
         // Care guides (CRUD)
         Route::get('/care-guides', [AdminCareGuideController::class, 'index'])->name('care.index');

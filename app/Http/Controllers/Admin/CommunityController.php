@@ -25,6 +25,7 @@ class CommunityController extends Controller
     public function approve(CommunitySubmission $submission)
     {
         $submission->update(['status' => 'approved', 'admin_feedback' => null]);
+
         return back()->with('success', 'Submission approved and published.');
     }
 
@@ -32,6 +33,7 @@ class CommunityController extends Controller
     {
         $data = $request->validate(['admin_feedback' => ['nullable', 'string', 'max:1000']]);
         $submission->update(['status' => 'rejected', 'admin_feedback' => $data['admin_feedback'] ?? null]);
+
         return back()->with('success', 'Submission rejected.');
     }
 }

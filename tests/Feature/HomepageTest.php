@@ -30,7 +30,7 @@ class HomepageTest extends TestCase
             'status' => $orderStatus,
             'payment_method' => 'bkash',
             'payment_status' => $paymentStatus,
-            'transaction_id' => 'TRX-' . $orderNumber,
+            'transaction_id' => 'TRX-'.$orderNumber,
             'shipping_name' => 'Buyer',
             'shipping_phone' => '01700000000',
             'shipping_address' => 'Dhaka',
@@ -178,13 +178,13 @@ class HomepageTest extends TestCase
         $products = [];
 
         foreach ($names as $i => $name) {
-            $product = Product::factory()->create(['name' => $name . ' Fish']);
-            $product->variants()->create(['size' => 'standard', 'sku' => strtoupper($name) . '-' . $i, 'price' => 100, 'stock' => 10]);
+            $product = Product::factory()->create(['name' => $name.' Fish']);
+            $product->variants()->create(['size' => 'standard', 'sku' => strtoupper($name).'-'.$i, 'price' => 100, 'stock' => 10]);
             $products[] = $product;
         }
 
         foreach ($products as $i => $product) {
-            $this->createPaidOrderForProduct($customer, $product, 5 - $i, 'SA-' . strtoupper($names[$i]));
+            $this->createPaidOrderForProduct($customer, $product, 5 - $i, 'SA-'.strtoupper($names[$i]));
         }
 
         $response = $this->get('/');

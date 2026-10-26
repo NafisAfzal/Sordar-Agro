@@ -20,10 +20,20 @@ class OrderItem extends Model
         ];
     }
 
-    public function order(): BelongsTo   { return $this->belongsTo(Order::class); }
-    public function variant(): BelongsTo { return $this->belongsTo(ProductVariant::class, 'product_variant_id'); }
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
 
-    public function lineTotal(): float { return (float) $this->price * $this->quantity; }
+    public function variant(): BelongsTo
+    {
+        return $this->belongsTo(ProductVariant::class, 'product_variant_id');
+    }
+
+    public function lineTotal(): float
+    {
+        return (float) $this->price * $this->quantity;
+    }
 
     /** Total marketplace share earned from this line, using the snapshotted per-unit amount. */
     public function marketplaceShareTotal(): float

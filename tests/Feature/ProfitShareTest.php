@@ -18,9 +18,9 @@ class ProfitShareTest extends TestCase
         $category = Category::factory()->create();
 
         $response = $this->actingAs($seller)->post('/seller/products', [
-            'name'        => 'No Profit Share Product',
+            'name' => 'No Profit Share Product',
             'category_id' => $category->id,
-            'variants'    => [
+            'variants' => [
                 ['size' => 'standard', 'price' => 100, 'stock' => 5],
             ],
         ]);

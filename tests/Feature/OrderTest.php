@@ -5,9 +5,9 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OrderTest extends TestCase
@@ -20,25 +20,25 @@ class OrderTest extends TestCase
         $variant = $product->variants()->first();
 
         $order = Order::create(array_merge([
-            'order_number'     => 'SA-TEST001',
-            'user_id'          => $customer->id,
-            'total'            => 400,
-            'status'           => 'processing',
-            'payment_method'   => 'bkash',
-            'payment_status'   => 'paid',
-            'transaction_id'   => 'TRX123456',
-            'shipping_name'    => 'Buyer',
-            'shipping_phone'   => '01700000000',
+            'order_number' => 'SA-TEST001',
+            'user_id' => $customer->id,
+            'total' => 400,
+            'status' => 'processing',
+            'payment_method' => 'bkash',
+            'payment_status' => 'paid',
+            'transaction_id' => 'TRX'.strtoupper(Str::random(10)),
+            'shipping_name' => 'Buyer',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'Dhaka',
         ], $overrides));
 
         OrderItem::create([
-            'order_id'           => $order->id,
+            'order_id' => $order->id,
             'product_variant_id' => $variant->id,
-            'product_name'       => $product->name,
-            'variant_size'       => $variant->label,
-            'price'              => $variant->price,
-            'quantity'           => 2,
+            'product_name' => $product->name,
+            'variant_size' => $variant->label,
+            'price' => $variant->price,
+            'quantity' => 2,
             'marketplace_share_amount' => $product->profit_share_amount,
         ]);
 
@@ -129,8 +129,8 @@ class OrderTest extends TestCase
     {
         $customer = User::factory()->create();
         $order = $this->createPaidOrder($customer, [
-            'status'        => 'shipped',
-            'courier'       => 'pathao',
+            'status' => 'shipped',
+            'courier' => 'pathao',
             'tracking_code' => 'PATHAO-ABC123',
         ]);
 
@@ -169,24 +169,24 @@ class OrderTest extends TestCase
         $variant = $product->variants()->first();
 
         $order = Order::create([
-            'order_number'     => 'SA-UNPAID001',
-            'user_id'          => $customer->id,
-            'total'            => 200,
-            'status'           => 'processing',
-            'payment_method'   => 'bkash',
-            'payment_status'   => 'unpaid',
-            'shipping_name'    => 'Buyer',
-            'shipping_phone'   => '01700000000',
+            'order_number' => 'SA-UNPAID001',
+            'user_id' => $customer->id,
+            'total' => 200,
+            'status' => 'processing',
+            'payment_method' => 'bkash',
+            'payment_status' => 'unpaid',
+            'shipping_name' => 'Buyer',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'Dhaka',
         ]);
 
         OrderItem::create([
-            'order_id'           => $order->id,
+            'order_id' => $order->id,
             'product_variant_id' => $variant->id,
-            'product_name'       => $product->name,
-            'variant_size'       => $variant->label,
-            'price'              => $variant->price,
-            'quantity'           => 1,
+            'product_name' => $product->name,
+            'variant_size' => $variant->label,
+            'price' => $variant->price,
+            'quantity' => 1,
             'marketplace_share_amount' => $product->profit_share_amount,
         ]);
 

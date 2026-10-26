@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\CareGuide;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -90,7 +89,7 @@ class SitemapTest extends TestCase
     public function test_robots_txt_contains_sitemap_directive(): void
     {
         $response = $this->get('/robots.txt');
-        $response->assertSee('Sitemap: ' . route('sitemap.index'));
+        $response->assertSee('Sitemap: '.route('sitemap.index'));
     }
 
     public function test_robots_txt_disallows_all_private_paths(): void
