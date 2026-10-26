@@ -16,9 +16,15 @@ class CareGuide extends Model
         return ['published_at' => 'datetime'];
     }
 
-    public function getRouteKeyName(): string { return 'slug'; }
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
-    public function author(): BelongsTo { return $this->belongsTo(User::class, 'author_id'); }
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
 
     public function isPublished(): bool
     {

@@ -14,7 +14,7 @@ return new class extends Migration
             // Keep the variant link but also snapshot name/size/price so the
             // order remains accurate even if the product later changes.
             $table->foreignId('product_variant_id')->nullable()
-                  ->constrained('product_variants')->nullOnDelete();
+                ->constrained('product_variants')->nullOnDelete();
             $table->string('product_name');
             $table->string('variant_size');
             $table->decimal('price', 10, 2);

@@ -17,7 +17,7 @@ return new class extends Migration
 
             // Fulfilment status shown to the customer on the tracking page.
             $table->enum('status', ['processing', 'shipped', 'delivered', 'cancelled'])
-                  ->default('processing');
+                ->default('processing');
 
             // Simulated payment.
             $table->enum('payment_method', ['bkash', 'nagad'])->nullable();

@@ -77,10 +77,10 @@ class PaymentController extends Controller
             ],
         ], [
             'transaction_id.required' => 'Please enter the Transaction ID from your confirmation message.',
-            'transaction_id.min'      => 'That Transaction ID looks too short — please check your SMS.',
-            'transaction_id.max'      => 'That Transaction ID looks too long — please check your SMS.',
-            'transaction_id.regex'    => 'A Transaction ID may contain only letters, numbers, and hyphens.',
-            'transaction_id.unique'   => 'This Transaction ID has already been used for another order.',
+            'transaction_id.min' => 'That Transaction ID looks too short — please check your SMS.',
+            'transaction_id.max' => 'That Transaction ID looks too long — please check your SMS.',
+            'transaction_id.regex' => 'A Transaction ID may contain only letters, numbers, and hyphens.',
+            'transaction_id.unique' => 'This Transaction ID has already been used for another order.',
         ]);
 
         try {
@@ -111,11 +111,11 @@ class PaymentController extends Controller
                 }
 
                 $locked->forceFill([
-                    'payment_status'       => Order::PAYMENT_UNPAID,
-                    'transaction_id'       => $data['transaction_id'],
+                    'payment_status' => Order::PAYMENT_UNPAID,
+                    'transaction_id' => $data['transaction_id'],
                     'payment_submitted_at' => now(),
-                    'payment_verified_at'  => null,
-                    'payment_verified_by'  => null,
+                    'payment_verified_at' => null,
+                    'payment_verified_by' => null,
                 ])->save();
 
                 Cart::where('user_id', $locked->user_id)->delete();

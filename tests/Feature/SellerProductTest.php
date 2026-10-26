@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -21,18 +20,18 @@ class SellerProductTest extends TestCase
 
         $product = Product::factory()->create([
             'seller_id' => $sellerA->id,
-            'status'    => 'pending',
+            'status' => 'pending',
             'category_id' => $category->id,
-            'name'      => 'Original Name',
+            'name' => 'Original Name',
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'SKU1', 'price' => 100, 'stock' => 5]);
 
         $this->actingAs($sellerB)
             ->put("/seller/products/{$product->slug}", [
-                'name'        => 'Hacked Name',
+                'name' => 'Hacked Name',
                 'category_id' => $category->id,
                 'description' => 'Updated',
-                'variants'    => [
+                'variants' => [
                     ['size' => 'standard', 'price' => 150, 'stock' => 8],
                 ],
                 'profit_share_amount' => 50,
@@ -50,7 +49,7 @@ class SellerProductTest extends TestCase
 
         $product = Product::factory()->create([
             'seller_id' => $sellerA->id,
-            'status'    => 'pending',
+            'status' => 'pending',
             'category_id' => $category->id,
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'SKU1', 'price' => 100, 'stock' => 5]);
@@ -68,17 +67,17 @@ class SellerProductTest extends TestCase
 
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
-            'status'    => 'approved',
+            'status' => 'approved',
             'category_id' => $category->id,
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'SKU1', 'price' => 100, 'stock' => 5]);
 
         $this->actingAs($seller)
             ->put("/seller/products/{$product->slug}", [
-                'name'        => 'Attempted Update',
+                'name' => 'Attempted Update',
                 'category_id' => $category->id,
                 'description' => 'Updated',
-                'variants'    => [
+                'variants' => [
                     ['size' => 'standard', 'price' => 150, 'stock' => 8],
                 ],
                 'profit_share_amount' => 50,
@@ -93,7 +92,7 @@ class SellerProductTest extends TestCase
 
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
-            'status'    => 'approved',
+            'status' => 'approved',
             'category_id' => $category->id,
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'SKU1', 'price' => 100, 'stock' => 5]);
@@ -110,12 +109,12 @@ class SellerProductTest extends TestCase
         $category = Category::factory()->create();
 
         $this->actingAs($seller)->post('/seller/products', [
-            'name'        => 'Premium Betta',
+            'name' => 'Premium Betta',
             'category_id' => $category->id,
             'description' => 'Beautiful betta fish',
-            'is_fish'     => 1,
+            'is_fish' => 1,
             'profit_share_amount' => 75,
-            'variants'    => [
+            'variants' => [
                 ['size' => 'small', 'price' => 200, 'stock' => 10, 'size_description' => '2-3 cm'],
                 ['size' => 'medium', 'price' => 300, 'stock' => 8, 'size_description' => '3-4 cm'],
                 ['size' => 'large', 'price' => 450, 'stock' => 5, 'size_description' => '4-5 cm'],
@@ -138,12 +137,12 @@ class SellerProductTest extends TestCase
         $category = Category::factory()->create();
 
         $this->actingAs($seller)->post('/seller/products', [
-            'name'        => 'Aquarium Plant Food',
+            'name' => 'Aquarium Plant Food',
             'category_id' => $category->id,
             'description' => 'Liquid fertilizer',
-            'is_fish'     => 0,
+            'is_fish' => 0,
             'profit_share_amount' => 30,
-            'variants'    => [
+            'variants' => [
                 ['size' => 'standard', 'price' => 150, 'stock' => 20],
             ],
         ]);
@@ -162,16 +161,16 @@ class SellerProductTest extends TestCase
 
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
-            'status'    => 'pending',
+            'status' => 'pending',
             'category_id' => $category->id,
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'SKU1', 'price' => 100, 'stock' => 5]);
 
         $this->actingAs($seller)->put("/seller/products/{$product->slug}", [
-            'name'        => 'Updated Name',
+            'name' => 'Updated Name',
             'category_id' => $category->id,
             'description' => 'Updated description',
-            'variants'    => [
+            'variants' => [
                 ['size' => 'standard', 'price' => 150, 'stock' => 8],
             ],
             'profit_share_amount' => 50,
@@ -190,17 +189,17 @@ class SellerProductTest extends TestCase
 
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
-            'status'    => 'rejected',
+            'status' => 'rejected',
             'category_id' => $category->id,
             'admin_feedback' => 'Price too high',
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'SKU1', 'price' => 100, 'stock' => 5]);
 
         $this->actingAs($seller)->put("/seller/products/{$product->slug}", [
-            'name'        => 'Updated Name',
+            'name' => 'Updated Name',
             'category_id' => $category->id,
             'description' => 'Updated description',
-            'variants'    => [
+            'variants' => [
                 ['size' => 'standard', 'price' => 80, 'stock' => 8],
             ],
             'profit_share_amount' => 50,
@@ -220,7 +219,7 @@ class SellerProductTest extends TestCase
 
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
-            'status'    => 'pending',
+            'status' => 'pending',
             'category_id' => $category->id,
         ]);
         $product->variants()->create(['size' => 'standard', 'sku' => 'SKU1', 'price' => 100, 'stock' => 5]);
@@ -236,12 +235,12 @@ class SellerProductTest extends TestCase
         $category = Category::factory()->create();
 
         $response = $this->actingAs($seller)->post('/seller/products', [
-            'name'        => 'No Variants Product',
+            'name' => 'No Variants Product',
             'category_id' => $category->id,
             'description' => 'Missing variants',
-            'is_fish'     => 0,
+            'is_fish' => 0,
             'profit_share_amount' => 50,
-            'variants'    => [],
+            'variants' => [],
         ]);
 
         $response->assertSessionHasErrors('variants');
@@ -254,11 +253,11 @@ class SellerProductTest extends TestCase
         $category = Category::factory()->create();
 
         $response = $this->actingAs($seller)->post('/seller/products', [
-            'name'        => 'No Profit Share Product',
+            'name' => 'No Profit Share Product',
             'category_id' => $category->id,
             'description' => 'Missing profit share',
-            'is_fish'     => 0,
-            'variants'    => [
+            'is_fish' => 0,
+            'variants' => [
                 ['size' => 'standard', 'price' => 100, 'stock' => 5],
             ],
         ]);

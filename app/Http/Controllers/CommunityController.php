@@ -27,14 +27,14 @@ class CommunityController extends Controller
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'body'  => ['required', 'string', 'max:5000'],
+            'body' => ['required', 'string', 'max:5000'],
         ]);
 
         CommunitySubmission::create([
             'user_id' => auth()->id(),
-            'title'   => $data['title'],
-            'body'    => $data['body'],
-            'status'  => 'pending',
+            'title' => $data['title'],
+            'body' => $data['body'],
+            'status' => 'pending',
         ]);
 
         return redirect()->route('community.index')

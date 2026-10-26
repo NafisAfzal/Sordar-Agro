@@ -18,14 +18,14 @@ class DashboardController extends Controller
     {
         $period = $request->input('period', 'all');
         $dateFrom = $this->resolveDateFrom($period, $request->input('date_from'));
-        $dateTo   = $this->resolveDateTo($period, $request->input('date_to'));
+        $dateTo = $this->resolveDateTo($period, $request->input('date_to'));
 
         // All-time stats (sidebar cards — always visible regardless of filter).
         $allTimeStats = [
-            'customers'         => User::where('role', 'customer')->count(),
-            'sellers'           => User::where('role', 'seller')->count(),
-            'products'          => Product::count(),
-            'pending_products'  => Product::where('status', 'pending')->count(),
+            'customers' => User::where('role', 'customer')->count(),
+            'sellers' => User::where('role', 'seller')->count(),
+            'products' => Product::count(),
+            'pending_products' => Product::where('status', 'pending')->count(),
             'pending_community' => CommunitySubmission::where('status', 'pending')->count(),
         ];
 
@@ -149,44 +149,44 @@ class DashboardController extends Controller
             ->get()->count();
 
         return view('admin.dashboard', array_merge($allTimeStats, [
-            'processingOrders'     => $processingOrders,
-            'pendingPayments'      => $pendingPayments,
-            'outOfStockProducts'   => $outOfStockProducts,
-            'lowStockProductsCount'=> $lowStockProductsCount,
-            'period'             => $period,
-            'dateFrom'           => $dateFrom?->format('Y-m-d'),
-            'dateTo'             => $dateTo?->format('Y-m-d'),
-            'periodOrders'       => $periodOrders,
-            'periodRevenue'      => $periodRevenue,
-            'marketplaceEarnings'=> $marketplaceEarnings,
-            'ownProductSales'    => $ownProductSales,
+            'processingOrders' => $processingOrders,
+            'pendingPayments' => $pendingPayments,
+            'outOfStockProducts' => $outOfStockProducts,
+            'lowStockProductsCount' => $lowStockProductsCount,
+            'period' => $period,
+            'dateFrom' => $dateFrom?->format('Y-m-d'),
+            'dateTo' => $dateTo?->format('Y-m-d'),
+            'periodOrders' => $periodOrders,
+            'periodRevenue' => $periodRevenue,
+            'marketplaceEarnings' => $marketplaceEarnings,
+            'ownProductSales' => $ownProductSales,
             'sellerProductSales' => $sellerProductSales,
-            'totalUnitsSold'     => $totalUnitsSold,
-            'salesByProduct'     => $salesByProduct,
-            'shareBreakdown'     => $shareBreakdown,
-            'recentOrders'       => $recentOrders,
+            'totalUnitsSold' => $totalUnitsSold,
+            'salesByProduct' => $salesByProduct,
+            'shareBreakdown' => $shareBreakdown,
+            'recentOrders' => $recentOrders,
         ]));
     }
 
     private function resolveDateFrom(string $period, ?string $customFrom): ?Carbon
     {
         return match ($period) {
-            'today'  => Carbon::today(),
-            'week'   => Carbon::now()->startOfWeek(),
-            'month'  => Carbon::now()->startOfMonth(),
+            'today' => Carbon::today(),
+            'week' => Carbon::now()->startOfWeek(),
+            'month' => Carbon::now()->startOfMonth(),
             'custom' => $customFrom ? Carbon::parse($customFrom) : null,
-            default  => null,
+            default => null,
         };
     }
 
     private function resolveDateTo(string $period, ?string $customTo): ?Carbon
     {
         return match ($period) {
-            'today'  => Carbon::today(),
-            'week'   => Carbon::now()->endOfWeek(),
-            'month'  => Carbon::now()->endOfMonth(),
+            'today' => Carbon::today(),
+            'week' => Carbon::now()->endOfWeek(),
+            'month' => Carbon::now()->endOfMonth(),
             'custom' => $customTo ? Carbon::parse($customTo) : null,
-            default  => null,
+            default => null,
         };
     }
 }

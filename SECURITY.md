@@ -62,6 +62,68 @@ without written permission.
   with `audit.block-insecure=true`. Dependabot checks Composer, npm,
   GitHub Actions, and Docker weekly.
 
+## Verifying a payment
+
+When an admin sees an order in the **Payment pending** queue, the following
+manual verification steps must be completed before pressing **Verify**:
+
+1. Open the order in the admin dashboard and note the **TrxID**, **amount**,
+   and **payment method** (bKash or Nagad).
+2. Log in to the corresponding mobile-money merchant/personal statement.
+3. Find the transaction matching the submitted TrxID.
+4. Confirm all three match:
+   - **TrxID** — exact match with the customer's submission.
+   - **Amount** — matches the order total (to the taka).
+   - **Sender number** — matches the customer's registered phone number.
+5. If all three match, press **Verify payment**. The order becomes `paid`.
+6. If any detail does not match, press **Reject payment**. This marks the
+   payment as `failed` and **releases the reserved stock** back to inventory.
+
+> **Note:** Rejecting a payment does not prevent the customer from submitting
+> a new TrxID later. The stock reservation cycle restarts on each new
+> submission.
+
+## Queue health monitoring
+
+The `queue:check-health` command runs hourly via the Laravel scheduler. It
+checks the `failed_jobs` table and logs an error if any jobs have failed. In
+production, ensure the scheduler is running (`php artisan schedule:work` or a
+cron entry) so this check executes automatically.
+
+## Verifying a payment
+
+When an admin sees an order in the **Payment pending** queue, the following
+manual verification steps must be completed before pressing **Verify**:
+
+1. **Open the order** in the admin dashboard and note the submitted TrxID,
+   the order total, and the payment method (bKash or Nagad).
+2. **Log in** to the corresponding mobile-money account (bKash or Nagad)
+   and open the transaction statement for the relevant date.
+3. **Match the TrxID** — find the transaction whose TrxID exactly matches
+   the one submitted by the customer.
+4. **Match the amount** — confirm the transaction amount equals the order
+   total. Partial payments are not valid.
+5. **Match the sender number** — confirm the sender's mobile number matches
+   the customer's registered phone number or is otherwise explainable
+   (e.g. a family member paying on their behalf — use judgement).
+6. **Verify** — if all three match (TrxID + amount + sender), press
+   **Verify payment**. The order becomes `paid` and can be fulfilled.
+7. **Reject** — if any detail does not match, press **Reject payment**.
+   This marks the payment as `failed` and **releases the reserved stock**
+   back to inventory. The customer may then submit a new TrxID.
+
+> **Important:** A TrxID is a *claim*, not proof of payment. Never verify
+> based on the TrxID alone — always cross-reference the amount and sender
+> against the actual mobile-money statement.
+
+## Queue health monitoring
+
+The `queue:check-health` command runs hourly via the Laravel scheduler. It
+checks the `failed_jobs` table and logs an error when failed jobs are
+detected, indicating a stuck queue worker or downstream service failure.
+In production, ensure the scheduler is running (via cron:
+`* * * * * php /path-to-app/artisan schedule:run >> /dev/null 2>&1`).
+
 ## Deployment checklist
 
 - [ ] `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://…`

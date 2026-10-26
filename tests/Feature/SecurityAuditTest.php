@@ -3,13 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Cart;
-use App\Models\Category;
 use App\Models\CommunitySubmission;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\Wishlist;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,7 +30,7 @@ class SecurityAuditTest extends TestCase
         $user = User::factory()->create(['password' => 'correct-password']);
 
         $response = $this->post('/login', [
-            'email'    => $user->email,
+            'email' => $user->email,
             'password' => 'wrong-password',
         ]);
 
@@ -40,7 +41,7 @@ class SecurityAuditTest extends TestCase
     public function test_login_rejects_nonexistent_account(): void
     {
         $response = $this->post('/login', [
-            'email'    => 'nobody@example.com',
+            'email' => 'nobody@example.com',
             'password' => 'whatever123',
         ]);
 
@@ -66,12 +67,12 @@ class SecurityAuditTest extends TestCase
     public function test_registration_payload_cannot_assign_privileged_role_or_flags(): void
     {
         $response = $this->post('/register', [
-            'name'     => 'Escalator',
-            'email'    => 'escalator@example.com',
-            'phone'    => '01700000001',
+            'name' => 'Escalator',
+            'email' => 'escalator@example.com',
+            'phone' => '01700000001',
             'password' => 'strong-password',
             'password_confirmation' => 'strong-password',
-            'role'     => 'admin',
+            'role' => 'admin',
             'is_active' => false,
             'must_change_password' => false,
         ]);
@@ -89,14 +90,14 @@ class SecurityAuditTest extends TestCase
     private function makeOrder(User $user): Order
     {
         return Order::create([
-            'order_number'     => 'SA-IDOR001',
-            'user_id'          => $user->id,
-            'total'            => 250,
-            'status'           => 'processing',
-            'payment_method'   => 'bkash',
-            'payment_status'   => 'unpaid',
-            'shipping_name'    => 'Alice',
-            'shipping_phone'   => '01700000000',
+            'order_number' => 'SA-IDOR001',
+            'user_id' => $user->id,
+            'total' => 250,
+            'status' => 'processing',
+            'payment_method' => 'bkash',
+            'payment_status' => 'unpaid',
+            'shipping_name' => 'Alice',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'Dhaka',
         ]);
     }
@@ -121,7 +122,7 @@ class SecurityAuditTest extends TestCase
         ])->assertForbidden();
 
         $this->assertDatabaseMissing('orders', [
-            'id'             => $order->id,
+            'id' => $order->id,
             'transaction_id' => 'E2ETRX-SHOULD-NOT-EXIST-001',
         ]);
         $this->assertSame('unpaid', $order->fresh()->payment_status);
@@ -135,16 +136,16 @@ class SecurityAuditTest extends TestCase
         $product = Product::factory()->create();
         $variant = ProductVariant::create([
             'product_id' => $product->id,
-            'size'       => 'standard',
-            'price'      => 100,
-            'stock'      => 50,
-            'sku'        => 'SKU-IDOR-1',
+            'size' => 'standard',
+            'price' => 100,
+            'stock' => 50,
+            'sku' => 'SKU-IDOR-1',
         ]);
 
         $cart = Cart::create([
-            'user_id'            => $alice->id,
+            'user_id' => $alice->id,
             'product_variant_id' => $variant->id,
-            'quantity'           => 2,
+            'quantity' => 2,
         ]);
 
         $this->actingAs($bob)->patch("/cart/{$cart->id}", ['quantity' => 9])->assertForbidden();
@@ -161,7 +162,7 @@ class SecurityAuditTest extends TestCase
 
         $product = Product::factory()->create();
         $wishlist = Wishlist::create([
-            'user_id'    => $alice->id,
+            'user_id' => $alice->id,
             'product_id' => $product->id,
         ]);
 
@@ -179,10 +180,10 @@ class SecurityAuditTest extends TestCase
         $product = Product::factory()->create();
         $variant = ProductVariant::create([
             'product_id' => $product->id,
-            'size'       => 'standard',
-            'price'      => 100,
-            'stock'      => 40,
-            'sku'        => 'SKU-IDOR-2',
+            'size' => 'standard',
+            'price' => 100,
+            'stock' => 40,
+            'sku' => 'SKU-IDOR-2',
         ]);
 
         $this->actingAs($customer)->patch("/admin/variants/{$variant->id}/adjust", [
@@ -225,18 +226,18 @@ class SecurityAuditTest extends TestCase
 
     public function test_state_changing_routes_run_inside_the_web_group_with_csrf(): void
     {
-        $groups = $this->app->make(\Illuminate\Contracts\Http\Kernel::class)->getMiddlewareGroups();
+        $groups = $this->app->make(Kernel::class)->getMiddlewareGroups();
         $this->assertArrayHasKey('web', $groups);
 
         $csrfPresent = collect($groups['web'])->contains(
-            fn ($m) => str_contains(is_string($m) ? $m : '', \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+            fn ($m) => str_contains(is_string($m) ? $m : '', ValidateCsrfToken::class)
                 || str_contains(is_string($m) ? $m : '', 'VerifyCsrfToken')
         );
         $this->assertTrue($csrfPresent, 'The web middleware group must enforce CSRF.');
 
         foreach (['logout', 'cart.add', 'cart.update', 'cart.remove', 'checkout.place',
-                  'payment.process', 'wishlist.add', 'wishlist.remove',
-                  'community.store', 'seller.products.store'] as $name) {
+            'payment.process', 'wishlist.add', 'wishlist.remove',
+            'community.store', 'seller.products.store'] as $name) {
             $route = app('router')->getRoutes()->getByName($name);
             $this->assertNotNull($route, "Route {$name} must exist.");
             $this->assertContains('web', $route->gatherMiddleware(), "Route {$name} must be in the web group.");
@@ -263,9 +264,9 @@ class SecurityAuditTest extends TestCase
 
         CommunitySubmission::create([
             'user_id' => $author->id,
-            'title'   => $payload.' title',
-            'body'    => $payload.' body <img src=x onerror=alert(1)>',
-            'status'  => 'approved',
+            'title' => $payload.' title',
+            'body' => $payload.' body <img src=x onerror=alert(1)>',
+            'status' => 'approved',
         ]);
 
         $response = $this->get('/community');
@@ -284,7 +285,7 @@ class SecurityAuditTest extends TestCase
         $response->assertOk();
         $this->assertStringNotContainsString('<script>alert(1)</script>', $response->getContent());
 
-        $injection = $this->get("/products?q=".urlencode("' OR '1'='1"));
+        $injection = $this->get('/products?q='.urlencode("' OR '1'='1"));
         $injection->assertOk();
     }
 
@@ -307,25 +308,25 @@ class SecurityAuditTest extends TestCase
         $product = Product::factory()->create();
         $variant = ProductVariant::create([
             'product_id' => $product->id,
-            'size'       => 'standard',
-            'price'      => 500,
-            'stock'      => 10,
-            'sku'        => 'SKU-PAY-1',
+            'size' => 'standard',
+            'price' => 500,
+            'stock' => 10,
+            'sku' => 'SKU-PAY-1',
         ]);
         Cart::create([
-            'user_id'            => $user->id,
+            'user_id' => $user->id,
             'product_variant_id' => $variant->id,
-            'quantity'           => 1,
+            'quantity' => 1,
         ]);
 
         $this->actingAs($user)->post('/checkout', [
-            'shipping_name'    => 'Tester',
-            'shipping_phone'   => '01700000000',
+            'shipping_name' => 'Tester',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'E2E TEST ROAD',
-            'payment_method'   => 'bkash',
-            'total'            => 1,          // spoofed field — must be ignored
-            'payment_status'   => 'paid',     // spoofed field — must be ignored
-            'status'           => 'delivered',// spoofed field — must be ignored
+            'payment_method' => 'bkash',
+            'total' => 1,          // spoofed field — must be ignored
+            'payment_status' => 'paid',     // spoofed field — must be ignored
+            'status' => 'delivered', // spoofed field — must be ignored
         ]);
 
         $order = Order::where('user_id', $user->id)->latest('id')->first();

@@ -9,5 +9,8 @@ class CommunitySubmission extends Model
 {
     protected $fillable = ['user_id', 'title', 'body', 'status', 'admin_feedback'];
 
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

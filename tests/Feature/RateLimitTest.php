@@ -74,9 +74,9 @@ class RateLimitTest extends TestCase
     public function test_registration_is_rate_limited(): void
     {
         $register = fn (int $i) => $this->post('/register', [
-            'name'                  => 'User '.$i,
-            'email'                 => 'reg'.$i.'@example.com',
-            'password'              => 'password123',
+            'name' => 'User '.$i,
+            'email' => 'reg'.$i.'@example.com',
+            'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
 
@@ -116,7 +116,7 @@ class RateLimitTest extends TestCase
 
         $submit = fn (int $i) => $this->actingAs($customer)->post('/community/submit', [
             'title' => 'Submission '.$i,
-            'body'  => str_repeat('This is a community submission body. ', $i + 1),
+            'body' => str_repeat('This is a community submission body. ', $i + 1),
         ]);
 
         for ($i = 0; $i < 5; $i++) {
@@ -138,10 +138,10 @@ class RateLimitTest extends TestCase
         $this->actingAs($customer)->post("/cart/{$variant->id}", ['quantity' => 1]);
 
         $this->actingAs($customer)->post('/checkout', [
-            'shipping_name'    => 'Buyer',
-            'shipping_phone'   => '01700000000',
+            'shipping_name' => 'Buyer',
+            'shipping_phone' => '01700000000',
             'shipping_address' => 'House 1, Road 1, Dhaka',
-            'payment_method'   => 'bkash',
+            'payment_method' => 'bkash',
         ]);
 
         $order = Order::where('user_id', $customer->id)->latest()->first();

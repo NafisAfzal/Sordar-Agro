@@ -60,8 +60,6 @@ class SecurityHeaders
 
     /**
      * Build a single CSP header string.
-     *
-     * @return string
      */
     private function csp(Request $request): string
     {

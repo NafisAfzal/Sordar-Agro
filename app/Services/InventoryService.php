@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\Wishlist;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Centralises stock-change side effects so both the admin inventory screen
@@ -37,7 +37,7 @@ class InventoryService
             try {
                 Mail::raw(
                     "Good news! \"{$product->name}\" is back in stock at Sordar Agro. "
-                    ."Visit the store to grab it before it sells out again.",
+                    .'Visit the store to grab it before it sells out again.',
                     function ($message) use ($wishlist, $product) {
                         $message->to($wishlist->user->email)
                             ->subject("Back in stock: {$product->name}");

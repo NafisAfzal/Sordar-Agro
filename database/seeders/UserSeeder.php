@@ -16,10 +16,10 @@ class UserSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'name'      => 'Site Administrator',
-                'phone'     => '01700000000',
-                'password'  => 'password',     // hashed via model cast
-                'role'      => 'admin',
+                'name' => 'Site Administrator',
+                'phone' => '01700000000',
+                'password' => 'password',     // hashed via model cast
+                'role' => 'admin',
                 'is_active' => true,
                 'email_verified_at' => now(),
             ]
@@ -30,14 +30,14 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'seller@example.com'],
             [
-                'name'                 => 'Demo Aquatics',
-                'phone'                => '01800000000',
-                'password'             => 'password',
-                'role'                 => 'seller',
+                'name' => 'Demo Aquatics',
+                'phone' => '01800000000',
+                'password' => 'password',
+                'role' => 'seller',
                 'must_change_password' => false,
-                'is_active'            => true,
-                'created_by'           => $admin?->id,
-                'email_verified_at'    => now(),
+                'is_active' => true,
+                'created_by' => $admin?->id,
+                'email_verified_at' => now(),
             ]
         );
 
@@ -45,10 +45,10 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'customer@example.com'],
             [
-                'name'      => 'Demo Customer',
-                'phone'     => '01900000000',
-                'password'  => 'password',
-                'role'      => 'customer',
+                'name' => 'Demo Customer',
+                'phone' => '01900000000',
+                'password' => 'password',
+                'role' => 'customer',
                 'is_active' => true,
                 'email_verified_at' => now(),
             ]

@@ -44,6 +44,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order->load('items', 'user', 'paymentVerifier');
+
         return view('admin.orders.show', compact('order'));
     }
 
@@ -51,8 +52,8 @@ class OrderController extends Controller
     public function update(Request $request, Order $order, InventoryService $inventory)
     {
         $data = $request->validate([
-            'status'        => ['required', 'in:processing,shipped,delivered,cancelled'],
-            'courier'       => ['nullable', 'in:pathao,steadfast'],
+            'status' => ['required', 'in:processing,shipped,delivered,cancelled'],
+            'courier' => ['nullable', 'in:pathao,steadfast'],
             'tracking_code' => ['nullable', 'string', 'max:100'],
         ]);
 
@@ -83,9 +84,9 @@ class OrderController extends Controller
 
                 // A pending payment that never completed is no longer pending.
                 if ($locked->isAwaitingPaymentVerification()) {
-                    $data['payment_status']       = Order::PAYMENT_FAILED;
-                    $data['payment_verified_at']  = now();
-                    $data['payment_verified_by']  = auth()->id();
+                    $data['payment_status'] = Order::PAYMENT_FAILED;
+                    $data['payment_verified_at'] = now();
+                    $data['payment_verified_by'] = auth()->id();
                 }
             }
 
@@ -107,7 +108,7 @@ class OrderController extends Controller
             ->whereNotNull('transaction_id')
             ->where('status', '!=', 'cancelled')
             ->update([
-                'payment_status'      => Order::PAYMENT_PAID,
+                'payment_status' => Order::PAYMENT_PAID,
                 'payment_verified_at' => now(),
                 'payment_verified_by' => auth()->id(),
             ]);
@@ -139,7 +140,7 @@ class OrderController extends Controller
                 }
 
                 $locked->forceFill([
-                    'payment_status'      => Order::PAYMENT_FAILED,
+                    'payment_status' => Order::PAYMENT_FAILED,
                     'payment_verified_at' => now(),
                     'payment_verified_by' => auth()->id(),
                 ])->save();

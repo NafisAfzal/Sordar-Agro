@@ -2,18 +2,19 @@
 
 namespace App\Providers;
 
+use App\Models\Cart;
+use App\Models\Wishlist;
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Http\Request;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoTransportFactory;
 use Symfony\Component\Mailer\Transport\Dsn;
-use App\Models\Wishlist;
-use App\Models\Cart;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,11 +29,11 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFive();
 
         if ($this->app->environment('production')) {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
+            URL::forceScheme('https');
         }
 
         Mail::extend('brevo', function () {
-            $factory = new BrevoTransportFactory();
+            $factory = new BrevoTransportFactory;
 
             return $factory->create(
                 new Dsn('brevo+api', 'default', config('services.brevo.key'))
@@ -85,7 +86,7 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $view->with('globalCartCount', $cartCount)
-                 ->with('globalWishlistCount', $wishlistCount);
+                ->with('globalWishlistCount', $wishlistCount);
         });
     }
 }

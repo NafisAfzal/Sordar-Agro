@@ -12,6 +12,7 @@ class CareGuideController extends Controller
     public function index()
     {
         $guides = CareGuide::latest()->paginate(12);
+
         return view('admin.care.index', compact('guides'));
     }
 
@@ -25,13 +26,13 @@ class CareGuideController extends Controller
         $data = $this->validateGuide($request);
 
         CareGuide::create([
-            'title'        => $data['title'],
-            'slug'         => $this->uniqueSlug($data['title']),
-            'excerpt'      => $data['excerpt'] ?? null,
-            'content'      => $data['content'],
-            'image'        => $request->hasFile('image')
+            'title' => $data['title'],
+            'slug' => $this->uniqueSlug($data['title']),
+            'excerpt' => $data['excerpt'] ?? null,
+            'content' => $data['content'],
+            'image' => $request->hasFile('image')
                                 ? $request->file('image')->store('guides', 'public') : null,
-            'author_id'    => auth()->id(),
+            'author_id' => auth()->id(),
             'published_at' => $request->boolean('publish') ? now() : null,
         ]);
 
@@ -48,10 +49,10 @@ class CareGuideController extends Controller
         $data = $this->validateGuide($request);
 
         $careGuide->update([
-            'title'        => $data['title'],
-            'excerpt'      => $data['excerpt'] ?? null,
-            'content'      => $data['content'],
-            'image'        => $request->hasFile('image')
+            'title' => $data['title'],
+            'excerpt' => $data['excerpt'] ?? null,
+            'content' => $data['content'],
+            'image' => $request->hasFile('image')
                                 ? $request->file('image')->store('guides', 'public') : $careGuide->image,
             'published_at' => $request->boolean('publish') ? ($careGuide->published_at ?? now()) : null,
         ]);
@@ -62,16 +63,17 @@ class CareGuideController extends Controller
     public function destroy(CareGuide $careGuide)
     {
         $careGuide->delete();
+
         return back()->with('success', 'Care guide deleted.');
     }
 
     private function validateGuide(Request $request): array
     {
         return $request->validate([
-            'title'   => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:300'],
             'content' => ['required', 'string'],
-            'image'   => ['nullable', 'image', 'max:2048'],
+            'image' => ['nullable', 'image', 'max:2048'],
             'publish' => ['nullable', 'boolean'],
         ]);
     }
@@ -79,10 +81,12 @@ class CareGuideController extends Controller
     private function uniqueSlug(string $title): string
     {
         $base = Str::slug($title);
-        $slug = $base; $i = 1;
+        $slug = $base;
+        $i = 1;
         while (CareGuide::where('slug', $slug)->exists()) {
             $slug = $base.'-'.$i++;
         }
+
         return $slug;
     }
 }

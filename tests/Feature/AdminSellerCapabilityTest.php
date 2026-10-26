@@ -20,12 +20,12 @@ class AdminSellerCapabilityTest extends TestCase
         $category = Category::factory()->create();
 
         $this->actingAs($admin)->post('/seller/products', [
-            'name'        => 'Admin Test Betta',
+            'name' => 'Admin Test Betta',
             'category_id' => $category->id,
             'description' => 'Added directly by an administrator.',
-            'is_fish'     => 1,
+            'is_fish' => 1,
             'profit_share_amount' => 50,
-            'variants'    => [
+            'variants' => [
                 ['size' => 'standard', 'price' => 300, 'stock' => 10],
             ],
         ]);

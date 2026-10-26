@@ -20,10 +20,10 @@ class PaymentVerificationTest extends TestCase
 
         $this->actingAs($customer)->post("/cart/{$variant->id}", ['quantity' => $quantity]);
         $this->actingAs($customer)->post('/checkout', [
-            'shipping_name'    => 'Buyer',
-            'shipping_phone'   => '01700000000',
+            'shipping_name' => 'Buyer',
+            'shipping_phone' => '01700000000',
             'shipping_address' => '123 Test Road, Dhaka',
-            'payment_method'   => 'bkash',
+            'payment_method' => 'bkash',
         ]);
 
         return Order::where('user_id', $customer->id)->latest('id')->firstOrFail();

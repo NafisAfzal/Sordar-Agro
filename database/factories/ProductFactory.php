@@ -14,11 +14,11 @@ class ProductFactory extends Factory
 
         return [
             'category_id' => Category::inRandomOrder()->value('id') ?? Category::factory(),
-            'name'        => Str::title($name),
-            'slug'        => Str::slug($name).'-'.Str::random(4),
+            'name' => Str::title($name),
+            'slug' => Str::slug($name).'-'.Str::random(4),
             'description' => fake()->paragraph(),
-            'is_fish'     => false,
-            'status'      => 'approved',
+            'is_fish' => false,
+            'status' => 'approved',
             'is_featured' => fake()->boolean(30),
         ];
     }
@@ -26,9 +26,9 @@ class ProductFactory extends Factory
     public function fish(): static
     {
         return $this->state(fn () => [
-            'is_fish'              => true,
-            'min_tank_size_litres'=> fake()->randomElement([40, 60, 80, 120]),
-            'temperament'         => fake()->randomElement(['peaceful', 'semi-aggressive', 'aggressive']),
+            'is_fish' => true,
+            'min_tank_size_litres' => fake()->randomElement([40, 60, 80, 120]),
+            'temperament' => fake()->randomElement(['peaceful', 'semi-aggressive', 'aggressive']),
         ]);
     }
 
@@ -41,8 +41,8 @@ class ProductFactory extends Factory
     {
         return $this->afterCreating(function ($product) use ($stock, $price) {
             $product->variants()->create([
-                'size'  => 'standard',
-                'sku'   => strtoupper(Str::random(8)),
+                'size' => 'standard',
+                'sku' => strtoupper(Str::random(8)),
                 'price' => $price,
                 'stock' => $stock,
             ]);

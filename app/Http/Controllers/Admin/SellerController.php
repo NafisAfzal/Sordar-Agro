@@ -35,18 +35,18 @@ class SellerController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'unique:users,email'],
-            'phone'    => ['nullable', 'string', 'max:20', 'unique:users,phone'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
             'password' => ['required', Password::min(8)],
         ]);
 
         User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'phone'    => $data['phone'] ?? null,
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
             'password' => $data['password'],
-            'role'     => 'seller',
+            'role' => 'seller',
             'must_change_password' => true,        // forced change on first login
             'created_by' => auth()->id(),          // links seller to this admin
         ]);

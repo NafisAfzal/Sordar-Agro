@@ -23,7 +23,7 @@ class LoginController extends Controller
         $email = Str::lower((string) $request->input('email'));
 
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
         $credentials['email'] = $email;

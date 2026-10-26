@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\Rules\Password as PasswordRule;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class PasswordController extends Controller
 {
@@ -35,9 +34,9 @@ class PasswordController extends Controller
         $request->validate($rules);
 
         $user->forceFill([
-            'password'            => $request->password,
+            'password' => $request->password,
             'must_change_password' => false,
-            'remember_token'      => Str::random(60),
+            'remember_token' => Str::random(60),
         ])->save();
 
         // Invalidate every other session that authenticated with the old
@@ -83,8 +82,8 @@ class PasswordController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'token'    => ['required'],
-            'email'    => ['required', 'email'],
+            'token' => ['required'],
+            'email' => ['required', 'email'],
             'password' => ['required', 'confirmed', PasswordRule::min(8)],
         ]);
 

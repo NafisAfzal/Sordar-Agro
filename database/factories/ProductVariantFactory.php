@@ -11,11 +11,11 @@ class ProductVariantFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id'       => Product::factory(),
-            'size'             => 'standard',
-            'sku'              => strtoupper(Str::random(8)),
-            'price'            => fake()->randomFloat(2, 100, 2000),
-            'stock'            => fake()->numberBetween(1, 50),
+            'product_id' => Product::factory(),
+            'size' => 'standard',
+            'sku' => strtoupper(Str::random(8)),
+            'price' => fake()->randomFloat(2, 100, 2000),
+            'stock' => fake()->numberBetween(1, 50),
             'size_description' => null,
         ];
     }

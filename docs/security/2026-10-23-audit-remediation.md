@@ -235,6 +235,26 @@ npm audit --audit-level=high
 docker build -t sordar-agro .
 ```
 
+## Framework upgrade planning
+
+- **Laravel 12 security end-of-life: 2027-02-24.** After this date, Laravel 12
+  will no longer receive security patches.
+- **Plan:** Schedule upgrade to Laravel 13 in Q1 2027 (expected release Q1 2027).
+  Laravel 13 will require PHP >= 8.3, which is already satisfied by the
+  production container (PHP 8.4).
+- **Action items:** Monitor the Laravel 13 release announcement, test the
+  upgrade in a staging environment before the EOL date, and allocate time for
+  any breaking changes in the upgrade guide.
+
+## Framework upgrade planning
+
+- **Laravel 12 security EOL: 2027-02-24.** After this date, Laravel 12 will
+  no longer receive security patches.
+- **Planned upgrade:** Laravel 13 in Q1 2027. Laravel 13 requires PHP >= 8.3,
+  which is already satisfied by the production container (PHP 8.4).
+- **Action:** Schedule the upgrade, test against the new framework version in
+  a staging environment, and deploy before the EOL date.
+
 ## Deployment notes for existing databases
 
 The payment-verification migration

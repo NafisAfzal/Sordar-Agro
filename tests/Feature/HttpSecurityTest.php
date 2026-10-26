@@ -22,14 +22,14 @@ class HttpSecurityTest extends TestCase
         $this->assertStringContainsString('font-src \'self\' https://cdn.jsdelivr.net https://fonts.gstatic.com data:', $csp);
         $this->assertStringContainsString("img-src 'self' data: https:", $csp);
         $this->assertStringContainsString("connect-src 'self'", $csp);
-        $this->assertStringContainsString("object-src none", $csp);
+        $this->assertStringContainsString('object-src none', $csp);
         $this->assertStringContainsString("frame-ancestors 'self'", $csp);
         $this->assertStringContainsString("base-uri 'self'", $csp);
         $this->assertStringContainsString("form-action 'self'", $csp);
 
         // No origin may host scripts for this page except self plus the CDN.
         $this->assertStringContainsString("script-src 'self'", $csp);
-        $this->assertStringContainsString("https://cdn.jsdelivr.net", $csp);
+        $this->assertStringContainsString('https://cdn.jsdelivr.net', $csp);
     }
 
     public function test_standard_hardening_headers_are_present(): void
@@ -48,8 +48,8 @@ class HttpSecurityTest extends TestCase
 
     public function test_hsts_is_only_emitted_for_secure_production_requests(): void
     {
-        $middleware = new SecurityHeaders();
-        $next = fn (Request $request): Response => new Response();
+        $middleware = new SecurityHeaders;
+        $next = fn (Request $request): Response => new Response;
 
         // Non-secure production request — no HSTS.
         $response = $middleware->handle(Request::create('http://example.com/'), $next);

@@ -1,37 +1,34 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Admin\CareGuideController as AdminCareGuideController;
 // ---- Auth controllers --------------------------------------------------
-use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Admin\CommunityController as AdminCommunityController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
+// ---- Storefront controllers -------------------------------------------
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\SellerController as AdminSellerController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
-
-// ---- Storefront controllers -------------------------------------------
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SitemapController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\WishlistController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\CareGuideController;
-use App\Http\Controllers\CommunityController;
-
+use App\Http\Controllers\CartController;
 // ---- Seller controllers -----------------------------------------------
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CommunityController;
+// ---- Admin controllers ------------------------------------------------
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Seller\DashboardController as SellerDashboard;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
-
-// ---- Admin controllers ------------------------------------------------
-use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\SellerController as AdminSellerController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\Admin\CareGuideController as AdminCareGuideController;
-use App\Http\Controllers\Admin\CommunityController as AdminCommunityController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\WishlistController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,14 +79,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/change-password', [PasswordController::class, 'updateChange'])->name('password.change.update');
 
     // Email verification
-    Route::get('/email/verify', [App\Http\Controllers\Auth\VerificationController::class, 'notice'])
+    Route::get('/email/verify', [VerificationController::class, 'notice'])
         ->name('verification.notice');
 
-    Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Auth\VerificationController::class, 'verify'])
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
         ->middleware(['signed'])
         ->name('verification.verify');
 
-    Route::post('/email/verification-notification', [App\Http\Controllers\Auth\VerificationController::class, 'resend'])
+    Route::post('/email/verification-notification', [VerificationController::class, 'resend'])
         ->middleware(['throttle:6,1'])
         ->name('verification.send');
 

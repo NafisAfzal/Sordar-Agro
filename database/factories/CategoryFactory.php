@@ -12,10 +12,10 @@ class CategoryFactory extends Factory
         $name = fake()->unique()->words(2, true);
 
         return [
-            'name'        => Str::title($name),
-            'slug'        => Str::slug($name).'-'.Str::random(4),
+            'name' => Str::title($name),
+            'slug' => Str::slug($name).'-'.Str::random(4),
             'description' => fake()->sentence(),
-            'parent_id'   => null,
+            'parent_id' => null,
         ];
     }
 }

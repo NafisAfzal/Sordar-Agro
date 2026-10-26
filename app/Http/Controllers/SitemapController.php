@@ -32,11 +32,11 @@ class SitemapController extends Controller
             ['loc' => route('community.index'), 'lastmod' => null],
         ])
             ->merge($products->map(fn (Product $p) => [
-                'loc'     => route('products.show', $p),
+                'loc' => route('products.show', $p),
                 'lastmod' => $p->updated_at,
             ]))
             ->merge($guides->map(fn (CareGuide $g) => [
-                'loc'     => route('care.show', $g),
+                'loc' => route('care.show', $g),
                 'lastmod' => $g->updated_at,
             ]));
 

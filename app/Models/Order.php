@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     public const PAYMENT_UNPAID = 'unpaid';
+
     public const PAYMENT_PAID = 'paid';
+
     public const PAYMENT_FAILED = 'failed';
 
     protected $fillable = [
@@ -23,25 +25,36 @@ class Order extends Model
     protected function casts(): array
     {
         return [
-            'total'                => 'decimal:2',
+            'total' => 'decimal:2',
             'payment_submitted_at' => 'datetime',
-            'payment_verified_at'  => 'datetime',
+            'payment_verified_at' => 'datetime',
         ];
     }
 
-    public function user(): BelongsTo  { return $this->belongsTo(User::class); }
-    public function items(): HasMany   { return $this->hasMany(OrderItem::class); }
-    public function paymentVerifier(): BelongsTo { return $this->belongsTo(User::class, 'payment_verified_by'); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function paymentVerifier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'payment_verified_by');
+    }
 
     /** Bootstrap badge colour per status, used in views. */
     public function statusColor(): string
     {
         return match ($this->status) {
             'processing' => 'warning',
-            'shipped'    => 'info',
-            'delivered'  => 'success',
-            'cancelled'  => 'danger',
-            default      => 'secondary',
+            'shipped' => 'info',
+            'delivered' => 'success',
+            'cancelled' => 'danger',
+            default => 'secondary',
         };
     }
 
@@ -64,10 +77,10 @@ class Order extends Model
     public function paymentStatusLabel(): string
     {
         return match (true) {
-            $this->isPaid()                        => 'Paid',
+            $this->isPaid() => 'Paid',
             $this->isAwaitingPaymentVerification() => 'Awaiting verification',
             $this->payment_status === self::PAYMENT_FAILED => 'Payment rejected',
-            default                                => 'Unpaid',
+            default => 'Unpaid',
         };
     }
 
@@ -75,10 +88,10 @@ class Order extends Model
     public function paymentStatusColor(): string
     {
         return match (true) {
-            $this->isPaid()                        => 'success',
+            $this->isPaid() => 'success',
             $this->isAwaitingPaymentVerification() => 'warning',
             $this->payment_status === self::PAYMENT_FAILED => 'danger',
-            default                                => 'secondary',
+            default => 'secondary',
         };
     }
 }

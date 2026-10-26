@@ -23,8 +23,8 @@ class PasswordSecurityTest extends TestCase
         $this->get('/change-password')->assertOk();
 
         $this->post('/change-password', [
-            'current_password'      => 'old-password',
-            'password'              => 'new-password-123',
+            'current_password' => 'old-password',
+            'password' => 'new-password-123',
             'password_confirmation' => 'new-password-123',
         ])->assertRedirect();
 
@@ -50,8 +50,8 @@ class PasswordSecurityTest extends TestCase
         $this->withSession(['password_hash_web' => $oldHash]);
 
         $this->post('/change-password', [
-            'current_password'      => 'old-password',
-            'password'              => 'new-password-123',
+            'current_password' => 'old-password',
+            'password' => 'new-password-123',
             'password_confirmation' => 'new-password-123',
         ])->assertRedirect();
 
@@ -64,12 +64,12 @@ class PasswordSecurityTest extends TestCase
     public function test_forced_password_change_does_not_require_the_temporary_password(): void
     {
         $user = User::factory()->create([
-            'password'             => 'temp-password',
+            'password' => 'temp-password',
             'must_change_password' => true,
         ]);
 
         $this->actingAs($user)->post('/change-password', [
-            'password'              => 'brand-new-password',
+            'password' => 'brand-new-password',
             'password_confirmation' => 'brand-new-password',
         ])->assertRedirect();
 

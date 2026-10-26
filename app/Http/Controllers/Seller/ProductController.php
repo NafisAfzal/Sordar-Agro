@@ -36,6 +36,7 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::all();
+
         return view('seller.products.create', compact('categories'));
     }
 
@@ -45,20 +46,20 @@ class ProductController extends Controller
 
         DB::transaction(function () use ($data, $request) {
             $product = Product::create([
-                'seller_id'   => auth()->id(),
+                'seller_id' => auth()->id(),
                 'category_id' => $data['category_id'],
-                'name'        => $data['name'],
-                'slug'        => $this->uniqueSlug($data['name']),
+                'name' => $data['name'],
+                'slug' => $this->uniqueSlug($data['name']),
                 'description' => $data['description'] ?? null,
-                'thumbnail'   => $this->storeThumb($request),
-                'is_fish'     => $request->boolean('is_fish'),
+                'thumbnail' => $this->storeThumb($request),
+                'is_fish' => $request->boolean('is_fish'),
                 'min_tank_size_litres' => $data['min_tank_size_litres'] ?? null,
                 'temperament' => $data['temperament'] ?? null,
                 'profit_share_amount' => $data['profit_share_amount'],
                 // Admin-submitted products skip the approval queue — the
                 // admin is the approver, so requiring self-approval would
                 // be illogical. Seller submissions still await approval.
-                'status'      => auth()->user()->isAdmin() ? 'approved' : 'pending',
+                'status' => auth()->user()->isAdmin() ? 'approved' : 'pending',
             ]);
 
             $this->saveVariants($product, $request);
@@ -96,14 +97,14 @@ class ProductController extends Controller
         DB::transaction(function () use ($product, $data, $request) {
             $product->update([
                 'category_id' => $data['category_id'],
-                'name'        => $data['name'],
+                'name' => $data['name'],
                 'description' => $data['description'] ?? null,
-                'thumbnail'   => $this->storeThumb($request) ?? $product->thumbnail,
-                'is_fish'     => $request->boolean('is_fish'),
+                'thumbnail' => $this->storeThumb($request) ?? $product->thumbnail,
+                'is_fish' => $request->boolean('is_fish'),
                 'min_tank_size_litres' => $data['min_tank_size_litres'] ?? null,
                 'temperament' => $data['temperament'] ?? null,
                 'profit_share_amount' => $data['profit_share_amount'],
-                'status'      => 'pending',      // re-submit for approval
+                'status' => 'pending',      // re-submit for approval
                 'admin_feedback' => null,
                 'rejection_reason_category' => null,
             ]);
@@ -130,21 +131,21 @@ class ProductController extends Controller
     private function validateProduct(Request $request): array
     {
         return $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'category_id' => ['required', 'exists:categories,id'],
             'description' => ['nullable', 'string'],
-            'thumbnail'   => ['nullable', 'image', 'max:2048'],
-            'is_fish'     => ['nullable', 'boolean'],
+            'thumbnail' => ['nullable', 'image', 'max:2048'],
+            'is_fish' => ['nullable', 'boolean'],
             'min_tank_size_litres' => ['nullable', 'integer', 'min:0'],
             'temperament' => ['nullable', 'in:peaceful,semi-aggressive,aggressive'],
             'profit_share_amount' => ['required', 'numeric', 'gt:0'],
 
             // Fish: three size rows. Non-fish: a single "standard" row. The
             // form posts arrays keyed by size; we validate the prices/stock.
-            'variants'              => ['required', 'array', 'min:1'],
-            'variants.*.size'       => ['required', 'in:small,medium,large,standard'],
-            'variants.*.price'      => ['required', 'numeric', 'min:0'],
-            'variants.*.stock'      => ['required', 'integer', 'min:0'],
+            'variants' => ['required', 'array', 'min:1'],
+            'variants.*.size' => ['required', 'in:small,medium,large,standard'],
+            'variants.*.price' => ['required', 'numeric', 'min:0'],
+            'variants.*.stock' => ['required', 'integer', 'min:0'],
             'variants.*.size_description' => ['nullable', 'string', 'max:500'],
         ]);
     }
@@ -153,12 +154,12 @@ class ProductController extends Controller
     {
         foreach ($request->input('variants', []) as $v) {
             ProductVariant::create([
-                'product_id'       => $product->id,
-                'size'             => $v['size'],
-                'price'            => $v['price'],
-                'stock'            => $v['stock'],
+                'product_id' => $product->id,
+                'size' => $v['size'],
+                'price' => $v['price'],
+                'stock' => $v['stock'],
                 'size_description' => $v['size_description'] ?? null,
-                'sku'              => strtoupper(Str::random(8)),
+                'sku' => strtoupper(Str::random(8)),
             ]);
         }
     }
@@ -168,6 +169,7 @@ class ProductController extends Controller
         if ($request->hasFile('thumbnail')) {
             return $request->file('thumbnail')->store('products', 'public');
         }
+
         return null;
     }
 
@@ -179,6 +181,7 @@ class ProductController extends Controller
         while (Product::where('slug', $slug)->exists()) {
             $slug = $base.'-'.$i++;
         }
+
         return $slug;
     }
 
