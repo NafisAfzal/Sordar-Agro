@@ -57,6 +57,7 @@ jobs:
       - name: Prepare test environment
         run: |
           cp .env.example .env
+          php artisan key:generate --force
           echo "DB_CONNECTION=mysql" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
           echo "DB_PORT=3306" >> .env
@@ -70,8 +71,14 @@ jobs:
             if mysqladmin ping -h 127.0.0.1 -uroot -psecret 2>/dev/null; then
               break
             fi
+            echo "Waiting for MySQL... ($i)"
             sleep 1
           done
+          # Fail the build if MySQL never started
+          if ! mysqladmin ping -h 127.0.0.1 -uroot -psecret 2>/dev/null; then
+            echo "::error::MySQL service did not become ready"
+            exit 1
+          fi
 
       - name: Run tests (MySQL)
         run: php artisan test --env=testing --compact
