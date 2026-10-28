@@ -215,11 +215,25 @@ must have those accounts removed or their passwords changed before going live.
   protections are emitted by `SecurityHeaders`.
 - **Payments:** TrxIDs are admin-verified, unique at the database level, and
   reserve stock until approved or released.
-- **Sessions:** encrypted by default, secure cookies in production, and other
-  sessions are invalidated on password change.
+- **Sessions:** encrypted by default, secure cookies in production, idle
+  timeout (30 min) and absolute session cap (12 h) for admin/seller roles
+  via `IdleSession` middleware, and sessions are invalidated on password
+  change.
+- **CSP:** a baseline CSP (`SecurityHeaders`) is emitted on every response.
+  Set `CSP_STRICT=true` in the environment to switch to nonce-based CSP
+  (**no `'unsafe-inline'`**) once inline scripts carry a `nonce` attribute.
 - **CI:** `.github/workflows/ci.yml` runs the PHP test matrix, Composer/npm
   audits, and a Docker build on every push/PR to `main`; Dependabot checks
   Composer, npm, GitHub Actions, and Docker weekly.
+
+### Security status & upgrade schedule
+
+- **Framework:** Laravel 12.x — security-supported until **2027-02-24**.
+- **PHP:** 8.4 in Docker; 8.2+ locally. PHP 8.2 reaches EOL
+  **2026-12-31**; the project already runs PHP 8.3 and 8.4 in CI.
+- **Laravel 13:** Laravel 12 support ends after **2027-02-24**; plan to
+  migrate to Laravel 13 before this date to remain on a security-supported
+  release.
 
 ---
 
