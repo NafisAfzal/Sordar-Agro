@@ -45,3 +45,7 @@ yarn-error.log
 database/*.sqlite
 database/database.sqlite
 /storage/*.png
+
+# Local composer binaries — downloaded for convenience, not committed
+composer.phar
+composer-setup.php

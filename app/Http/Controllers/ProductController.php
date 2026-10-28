@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -36,10 +37,10 @@ class ProductController extends Controller
             $query->where('min_tank_size_litres', '<=', $tank);
         }
 
-        // Price-range filter against the product's starting (cheapest-variant)
-        // price — the same figure shown on the product card. A product's
-        // starting price is >= min only if none of its variants are cheaper
-        // than min, and <= max only if at least one variant is at or below max.
+        // Price-range filter against the product's starting (cheapest-variant) price
+        // — the same figure shown on the product card. A product's starting price is >= min
+        // only if none of its variants are cheaper than min, and <= max only if at least one
+        // variant is at or below max.
         $min = $request->query('min_price');
         $max = $request->query('max_price');
         if ($min !== null) {
@@ -67,7 +68,7 @@ class ProductController extends Controller
         return view('storefront.index', compact('products', 'categories'));
     }
 
-    /** JSON endpoint powering the navbar live‑search dropdown. */
+    /** JSON endpoint powering the navbar live‐search dropdown. */
     public function suggestions(Request $request)
     {
         $term = trim((string) $request->query('q'));
@@ -76,18 +77,20 @@ class ProductController extends Controller
             return response()->json([]);
         }
 
-        $products = Product::approved()
-            ->with('variants', 'category')
-            ->where('name', 'like', "%{$term}%")
-            ->orderBy('name')
-            ->take(8)
-            ->get()
-            ->map(fn ($p) => [
-                'name' => $p->name,
-                'url' => route('products.show', $p),
-                'price' => number_format($p->starting_price, 2),
-                'category' => $p->category->name ?? '',
-            ]);
+        $products = Cache::remember("search-suggestions-{$term}", 60, function () use ($term) {
+            return Product::approved()
+                ->with('variants', 'category')
+                ->where('name', 'like', "%{$term}%")
+                ->orderBy('name')
+                ->take(8)
+                ->get()
+                ->map(fn ($p) => [
+                    'name' => $p->name,
+                    'url' => route('products.show', $p),
+                    'price' => number_format($p->starting_price, 2),
+                    'category' => $p->category->name ?? '',
+                ]);
+        });
 
         return response()->json($products);
     }

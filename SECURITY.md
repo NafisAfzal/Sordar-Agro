@@ -143,6 +143,41 @@ In production, ensure the scheduler is running (via cron:
 - [ ] `php artisan migrate --force` run during deploy
 - [ ] Backups and log retention configured by the hosting provider
 
+## Backups
+
+Database and uploaded-media backups are the hosting provider's responsibility.
+The application stores two things that must be backed up continuously:
+
+1. **Database** — all application tables, with the `orders`, `payments`,
+   `products`, `users`, and `audit`-relevant tables taking priority. Back up
+   **before** running the payment-verification migration so a duplicate
+   `transaction_id` resolution can be triaged against the pre-migration state.
+   On MySQL, use `mysqldump --single-transaction --quick` (or the provider's
+   managed backup) and encrypt at rest.
+
+2. **Media** — product images and seeded media live in `storage/app/public`
+   (mounted as a persistent volume in the Docker image). These are not in Git
+   and must be backed up by the hosting provider's volume-snapshot mechanism.
+
+### Backup retention
+
+- **Hourly** point-in-time recovery (binary logs / WAL) for the last 24 h.
+- **Daily** full backups retained for **14 days**.
+- **Weekly** full backups retained for **12 weeks**.
+
+### Restore verification
+
+The hosting provider must run a restore-verification drill at least monthly:
+restore the latest daily backup to an isolated database, run
+`php artisan migrate:status` to confirm the schema is clean, and boot the
+application read-only against it. Store the verification result as evidence.
+
+### Secrets in backups
+
+Never log or back up the `.env` file or secret-manager values. Restore
+secrets only from the provider's secret manager into the new environment; do
+not rely on a `.env` file left on disk.
+
 ## Upgrading an existing installation
 
 The payment-verification migration adds a **unique index** on
