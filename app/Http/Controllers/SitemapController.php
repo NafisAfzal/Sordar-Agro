@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\CareGuide;
 use App\Models\Product;
+use App\Services\CacheService;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Generates the public XML sitemap from existing, already-public data.
@@ -13,17 +15,23 @@ use Illuminate\Http\Response;
  */
 class SitemapController extends Controller
 {
-    public function index(): Response
+    public function index(CacheService $cache): Response
     {
-        $products = Product::approved()
-            ->with('category')
-            ->orderByDesc('updated_at')
-            ->get(['id', 'slug', 'updated_at']);
-
-        $guides = CareGuide::whereNotNull('published_at')
-            ->where('published_at', '<=', now())
-            ->orderByDesc('updated_at')
-            ->get(['id', 'slug', 'updated_at']);
+        // Cache the expensive row fetch, not the rendered URLs: route()
+        // depends on the current host and must stay correct per deployment.
+        [$products, $guides] = Cache::remember(
+            CacheService::SITEMAP_KEY,
+            now()->addHours(6),
+            fn () => [
+                Product::approved()
+                    ->orderByDesc('updated_at')
+                    ->get(['id', 'slug', 'updated_at']),
+                CareGuide::whereNotNull('published_at')
+                    ->where('published_at', '<=', now())
+                    ->orderByDesc('updated_at')
+                    ->get(['id', 'slug', 'updated_at']),
+            ]
+        );
 
         $urls = collect([
             ['loc' => route('home'), 'lastmod' => null],

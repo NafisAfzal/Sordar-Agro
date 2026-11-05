@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreSellerRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password;
 
 /**
  * Admin-only provisioning of Partner Sellers. The admin sets an email and a
@@ -32,14 +31,9 @@ class SellerController extends Controller
         return view('admin.sellers.create', compact('suggested'));
     }
 
-    public function store(Request $request)
+    public function store(StoreSellerRequest $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
-            'password' => ['required', Password::min(8)],
-        ]);
+        $data = $request->validated();
 
         User::create([
             'name' => $data['name'],

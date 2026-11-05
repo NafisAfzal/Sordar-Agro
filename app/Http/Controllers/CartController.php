@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Cart\AddToCartRequest;
+use App\Http\Requests\Cart\UpdateCartRequest;
 use App\Models\Cart;
 use App\Models\ProductVariant;
-use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
@@ -23,11 +24,9 @@ class CartController extends Controller
      * Add a chosen VARIANT to the cart. For fish the variant encodes the
      * selected size; quantity counts pairs.
      */
-    public function add(Request $request, ProductVariant $variant)
+    public function add(AddToCartRequest $request, ProductVariant $variant)
     {
-        $data = $request->validate([
-            'quantity' => ['nullable', 'integer', 'min:1', 'max:99'],
-        ]);
+        $data = $request->validated();
         $qty = $data['quantity'] ?? 1;
 
         if ($variant->stock <= 0) {
@@ -45,13 +44,11 @@ class CartController extends Controller
         return back()->with('success', 'Added to your cart.');
     }
 
-    public function update(Request $request, Cart $cart)
+    public function update(UpdateCartRequest $request, Cart $cart)
     {
         $this->authorizeOwner($cart);
 
-        $data = $request->validate([
-            'quantity' => ['required', 'integer', 'min:1', 'max:99'],
-        ]);
+        $data = $request->validated();
 
         // Never let the cart exceed available stock.
         $cart->quantity = min($data['quantity'], $cart->variant->stock);

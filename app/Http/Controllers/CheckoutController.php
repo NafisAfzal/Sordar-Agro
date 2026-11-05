@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\EmptyCartException;
+use App\Exceptions\InsufficientStockException;
+use App\Http\Requests\Checkout\PlaceOrderRequest;
 use App\Models\Cart;
-use App\Models\Order;
-use App\Models\OrderItem;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Services\OrderService;
 
 class CheckoutController extends Controller
 {
@@ -25,60 +24,19 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Create the order in 'unpaid' state, snapshot the line items, then send
-     * the customer to the simulated payment gateway. Stock is only decremented
-     * once payment succeeds (see PaymentController).
+     * Create the order and snapshot its line items atomically. Stock is
+     * re-checked under row locks inside OrderService, but is not reserved
+     * until the customer submits a TrxID (see PaymentController).
      */
-    public function place(Request $request)
+    public function place(PlaceOrderRequest $request, OrderService $orders)
     {
-        $data = $request->validate([
-            'shipping_name' => ['required', 'string', 'max:255'],
-            'shipping_phone' => ['required', 'string', 'max:20'],
-            'shipping_address' => ['required', 'string', 'max:1000'],
-            'payment_method' => ['required', 'in:bkash,nagad'],
-        ]);
-
-        $items = Cart::with('variant.product')->where('user_id', auth()->id())->get();
-
-        if ($items->isEmpty()) {
+        try {
+            $order = $orders->placeOrder($request->user(), $request->validated());
+        } catch (EmptyCartException) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        } catch (InsufficientStockException $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        // Guard against a variant selling out between cart and checkout.
-        foreach ($items as $item) {
-            if ($item->quantity > $item->variant->stock) {
-                return back()->with('error',
-                    "Not enough stock for {$item->variant->product->name} ({$item->variant->label}).");
-            }
-        }
-
-        $order = DB::transaction(function () use ($items, $data) {
-            $order = Order::create([
-                'order_number' => 'SA-'.strtoupper(Str::random(8)),
-                'user_id' => auth()->id(),
-                'total' => $items->sum(fn ($i) => $i->subtotal()),
-                'status' => 'processing',
-                'payment_method' => $data['payment_method'],
-                'payment_status' => 'unpaid',
-                'shipping_name' => $data['shipping_name'],
-                'shipping_phone' => $data['shipping_phone'],
-                'shipping_address' => $data['shipping_address'],
-            ]);
-
-            foreach ($items as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_variant_id' => $item->variant->id,
-                    'product_name' => $item->variant->product->name,
-                    'variant_size' => $item->variant->label,
-                    'price' => $item->variant->price,
-                    'quantity' => $item->quantity,
-                    'marketplace_share_amount' => $item->variant->product->profit_share_amount,
-                ]);
-            }
-
-            return $order;
-        });
 
         return redirect()->route('payment.show', $order);
     }

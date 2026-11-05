@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Community\StoreSubmissionRequest;
 use App\Models\CommunitySubmission;
-use Illuminate\Http\Request;
 
 class CommunityController extends Controller
 {
@@ -23,12 +23,9 @@ class CommunityController extends Controller
         return view('community.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreSubmissionRequest $request)
     {
-        $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'body' => ['required', 'string', 'max:5000'],
-        ]);
+        $data = $request->validated();
 
         CommunitySubmission::create([
             'user_id' => auth()->id(),

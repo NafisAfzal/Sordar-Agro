@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Seller\StoreProductRequest;
+use App\Http\Requests\Seller\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -40,9 +42,11 @@ class ProductController extends Controller
         return view('seller.products.create', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $data = $this->validateProduct($request);
+        $this->authorize('create', Product::class);
+
+        $data = $request->validated();
 
         DB::transaction(function () use ($data, $request) {
             $product = Product::create([
@@ -73,7 +77,7 @@ class ProductController extends Controller
 
     public function edit(Product $product)
     {
-        $this->authorizeOwner($product);
+        $this->authorize('view', $product);
 
         // Sellers may edit pending/rejected items; approved ones are locked.
         if ($product->status === 'approved') {
@@ -87,12 +91,11 @@ class ProductController extends Controller
         return view('seller.products.edit', compact('product', 'categories'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $this->authorizeOwner($product);
-        abort_if($product->status === 'approved', 403, 'Approved products are locked.');
+        $this->authorize('update', $product);
 
-        $data = $this->validateProduct($request);
+        $data = $request->validated();
 
         DB::transaction(function () use ($product, $data, $request) {
             $product->update([
@@ -119,8 +122,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        $this->authorizeOwner($product);
-        abort_if($product->status === 'approved', 403, 'Approved products cannot be deleted.');
+        $this->authorize('delete', $product);
 
         $product->delete();
 
@@ -128,28 +130,6 @@ class ProductController extends Controller
     }
 
     // ---- Helpers ------------------------------------------------------
-    private function validateProduct(Request $request): array
-    {
-        return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'description' => ['nullable', 'string'],
-            'thumbnail' => ['nullable', 'image', 'max:2048'],
-            'is_fish' => ['nullable', 'boolean'],
-            'min_tank_size_litres' => ['nullable', 'integer', 'min:0'],
-            'temperament' => ['nullable', 'in:peaceful,semi-aggressive,aggressive'],
-            'profit_share_amount' => ['required', 'numeric', 'gt:0'],
-
-            // Fish: three size rows. Non-fish: a single "standard" row. The
-            // form posts arrays keyed by size; we validate the prices/stock.
-            'variants' => ['required', 'array', 'min:1'],
-            'variants.*.size' => ['required', 'in:small,medium,large,standard'],
-            'variants.*.price' => ['required', 'numeric', 'min:0'],
-            'variants.*.stock' => ['required', 'integer', 'min:0'],
-            'variants.*.size_description' => ['nullable', 'string', 'max:500'],
-        ]);
-    }
-
     private function saveVariants(Product $product, Request $request): void
     {
         foreach ($request->input('variants', []) as $v) {
@@ -183,10 +163,5 @@ class ProductController extends Controller
         }
 
         return $slug;
-    }
-
-    private function authorizeOwner(Product $product): void
-    {
-        abort_unless($product->seller_id === auth()->id(), 403);
     }
 }

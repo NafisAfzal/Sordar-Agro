@@ -4,16 +4,23 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Adds transport and content-security hardening headers to every response.
  *
- * CSP deliberately permits:
- * - Bootstrap 5 + Icons via jsDelivr (the project's CDN assets)
- * - Google Fonts (style/font origins)
- * - 'unsafe-inline' scripts/styles because the Blade storefront still relies
- *   on inline `<script>` blocks and inline style attributes.
+ * CSP mode — controlled by the CSP_STRICT env flag (default false):
+ *
+ *  • CSP_STRICT=false (default): the storefront CSP permits 'unsafe-inline'
+ *    scripts/styles because the Blade views still rely on inline <script>
+ *    blocks and inline style attributes. Nonce is not needed.
+ *
+ *  • CSP_STRICT=true: a per-request nonce is generated and injected into the
+ *    response as 'Content-Security-Policy-Report-Only' is NOT used; instead
+ *    the main CSP drops 'unsafe-inline' from script-src/style-src and allows
+ *    only the nonce + trusted CDN origins. The nonce is shared with views via
+ *    a view variable `csp_nonce` so inline scripts can carry nonce="..." .
  *
  * HSTS is only emitted for secure requests in production; on plain HTTP or
  * local development it would break assets served over HTTP.
@@ -59,20 +66,53 @@ class SecurityHeaders
     }
 
     /**
+     * Generate (or reuse) a per-request nonce for strict CSP mode.
+     *
+     * The nonce is shared with views through a view variable so that inline
+     * <script> tags can carry nonce="...".
+     */
+    private function nonce(): string
+    {
+        static $nonce = null;
+
+        if ($nonce === null) {
+            $nonce = Str::random(32);
+        }
+
+        return $nonce;
+    }
+
+    /**
      * Build a single CSP header string.
+     *
+     * When CSP_STRICT is enabled, 'unsafe-inline' is removed from script-src
+     * and style-src and replaced with the per-request nonce.
      */
     private function csp(Request $request): string
     {
         $directives = array_keys(self::CSP_DIRECTIVES);
 
+        $strict = filter_var(env('CSP_STRICT', false), FILTER_VALIDATE_BOOLEAN);
+        $nonce = $strict ? $this->nonce() : '';
+
         $parts = array_map(
-            fn (string $directive): string => sprintf('%s %s', $directive, implode(' ', self::CSP_DIRECTIVES[$directive])),
+            function (string $directive) use ($strict, $nonce): string {
+                $sources = self::CSP_DIRECTIVES[$directive];
+
+                if ($strict && in_array($directive, ['script-src', 'style-src'], true)) {
+                    // Drop 'unsafe-inline' and use the nonce instead
+                    $sources = array_filter($sources, fn ($s) => $s !== "'unsafe-inline'");
+                    $sources = array_merge(["'nonce-{$nonce}'"], $sources);
+                }
+
+                return sprintf('%s %s', $directive, implode(' ', $sources));
+            },
             $directives
         );
 
         $policy = implode('; ', $parts);
 
-        // Upgrade any remaining HTTP subresource references on HTTPS pages.
+        // Upgrade any remaining HTTP subresource references on HTTPS pages
         if ($request->isSecure()) {
             $policy .= '; upgrade-insecure-requests';
         }

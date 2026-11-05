@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\RejectProductRequest;
+use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -15,6 +17,8 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Product::class);
+
         $query = Product::with('seller', 'category', 'variants')->latest();
 
         // Default to the review queue (pending) unless a status is chosen.
@@ -30,6 +34,8 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
+        $this->authorize('view', $product);
+
         $product->load('seller', 'category', 'variants', 'images');
 
         return view('admin.products.show', compact('product'));
@@ -37,6 +43,8 @@ class ProductController extends Controller
 
     public function approve(Product $product)
     {
+        $this->authorize('approve', $product);
+
         $product->update([
             'status' => 'approved',
             'admin_feedback' => null,
@@ -46,12 +54,11 @@ class ProductController extends Controller
         return back()->with('success', "“{$product->name}” approved and now live.");
     }
 
-    public function reject(Request $request, Product $product)
+    public function reject(RejectProductRequest $request, Product $product)
     {
-        $data = $request->validate([
-            'rejection_reason_category' => ['required', 'in:profit_share,price,quantity,product_quality,other'],
-            'admin_feedback' => ['required', 'string', 'max:1000'],
-        ]);
+        $this->authorize('reject', $product);
+
+        $data = $request->validated();
 
         $product->update([
             'status' => 'rejected',
@@ -69,15 +76,19 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
+        $this->authorize('view', $product);
+
         $categories = Category::all();
         $product->load('variants');
 
         return view('admin.products.edit', compact('product', 'categories'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $data = $this->validateProduct($request);
+        $this->authorize('update', $product);
+
+        $data = $request->validated();
 
         DB::transaction(function () use ($product, $data, $request) {
             $product->update([
@@ -109,6 +120,8 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
+        $this->authorize('delete', $product);
+
         $variantIds = $product->variants()->pluck('id');
         $hasOrderHistory = OrderItem::whereIn('product_variant_id', $variantIds)->exists();
 
@@ -123,26 +136,7 @@ class ProductController extends Controller
             ->with('success', "“{$product->name}” deleted.");
     }
 
-    // ---- Helpers (mirrors Seller\ProductController's validation/save
-    // logic — same shared form/view, but no ownership or status gate) ---
-    private function validateProduct(Request $request): array
-    {
-        return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'description' => ['nullable', 'string'],
-            'thumbnail' => ['nullable', 'image', 'max:2048'],
-            'is_fish' => ['nullable', 'boolean'],
-            'min_tank_size_litres' => ['nullable', 'integer', 'min:0'],
-            'temperament' => ['nullable', 'in:peaceful,semi-aggressive,aggressive'],
-            'variants' => ['required', 'array', 'min:1'],
-            'variants.*.size' => ['required', 'in:small,medium,large,standard'],
-            'variants.*.price' => ['required', 'numeric', 'min:0'],
-            'variants.*.stock' => ['required', 'integer', 'min:0'],
-            'variants.*.size_description' => ['nullable', 'string', 'max:500'],
-        ]);
-    }
-
+    // ---- Helpers ------------------------------------------------------
     private function saveVariants(Product $product, Request $request): void
     {
         foreach ($request->input('variants', []) as $v) {

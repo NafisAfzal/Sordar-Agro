@@ -25,7 +25,11 @@ chown -R www-data:www-data storage bootstrap/cache
 
 # Build production caches as the runtime user so the generated files stay
 # writable by the web process.
-gosu www-data php artisan migrate --force
+# Migrations can be disabled (e.g. when a migration runs out-of-band as a
+# release step) by setting RUN_MIGRATIONS=false in the container environment.
+if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
+    gosu www-data php artisan migrate --force
+fi
 gosu www-data php artisan config:cache
 gosu www-data php artisan route:cache
 gosu www-data php artisan view:cache

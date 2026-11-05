@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsurePasswordChanged;
+use App\Http\Middleware\IdleSession;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
@@ -34,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Invalidate stale sessions after a password change.
         $middleware->web(append: [
             AuthenticateSession::class,
+            IdleSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

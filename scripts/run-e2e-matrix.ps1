@@ -44,21 +44,21 @@ foreach ($project in @('desktop', 'mobile', 'tablet')) {
     Write-Host "===== Matrix project: $project ====="
 
     Write-Host "----- resetting E2E state (visual phase) -----"
-    php "$repo\storage\cleanup-e2e.php"
-    if ($LASTEXITCODE -ne 0) { throw "cleanup-e2e.php failed before $project" }
+    php "$repo\artisan" e2e:cleanup
+    if ($LASTEXITCODE -ne 0) { throw "e2e:cleanup failed before $project" }
 
     # Visual baselines always see the pristine seeded database.
     Invoke-Step "$project : visual baselines (clean DB)" (@('--project=' + $project) + $extra + @('e2e/visual-baselines.spec.ts'))
 
     Write-Host "----- resetting E2E state (functional phase) -----"
-    php "$repo\storage\cleanup-e2e.php"
-    if ($LASTEXITCODE -ne 0) { throw "cleanup-e2e.php failed mid-$project" }
+    php "$repo\artisan" e2e:cleanup
+    if ($LASTEXITCODE -ne 0) { throw "e2e:cleanup failed mid-$project" }
 
     Invoke-Step "$project : functional suites" (@('--project=' + $project) + $functionalSpecs)
 }
 
 Write-Host ""
 Write-Host "===== Matrix complete - final E2E state cleanup ====="
-php "$repo\storage\cleanup-e2e.php"
-if ($LASTEXITCODE -ne 0) { throw 'final cleanup-e2e.php failed' }
+php "$repo\artisan" e2e:cleanup
+if ($LASTEXITCODE -ne 0) { throw 'final e2e:cleanup failed' }
 Write-Host 'Matrix PASS (all projects green, database clean).'

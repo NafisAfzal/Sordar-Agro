@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SaveCareGuideRequest;
 use App\Models\CareGuide;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class CareGuideController extends Controller
@@ -21,9 +21,9 @@ class CareGuideController extends Controller
         return view('admin.care.create');
     }
 
-    public function store(Request $request)
+    public function store(SaveCareGuideRequest $request)
     {
-        $data = $this->validateGuide($request);
+        $data = $request->validated();
 
         CareGuide::create([
             'title' => $data['title'],
@@ -44,9 +44,9 @@ class CareGuideController extends Controller
         return view('admin.care.edit', ['guide' => $careGuide]);
     }
 
-    public function update(Request $request, CareGuide $careGuide)
+    public function update(SaveCareGuideRequest $request, CareGuide $careGuide)
     {
-        $data = $this->validateGuide($request);
+        $data = $request->validated();
 
         $careGuide->update([
             'title' => $data['title'],
@@ -65,17 +65,6 @@ class CareGuideController extends Controller
         $careGuide->delete();
 
         return back()->with('success', 'Care guide deleted.');
-    }
-
-    private function validateGuide(Request $request): array
-    {
-        return $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'excerpt' => ['nullable', 'string', 'max:300'],
-            'content' => ['required', 'string'],
-            'image' => ['nullable', 'image', 'max:2048'],
-            'publish' => ['nullable', 'boolean'],
-        ]);
     }
 
     private function uniqueSlug(string $title): string

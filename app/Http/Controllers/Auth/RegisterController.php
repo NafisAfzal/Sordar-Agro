@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password;
 
 /**
  * Public sign-up. Self-registered accounts ALWAYS get the 'customer' role.
@@ -24,20 +23,9 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
-    public function store(Request $request)
+    public function store(RegisterRequest $request)
     {
-        // Store email addresses in lowercase so look-ups are consistent
-        // across case-insensitive (MySQL) and case-sensitive (SQLite) collations.
-        if ($request->has('email')) {
-            $request->request->set('email', Str::lower((string) $request->input('email')));
-        }
-
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'max:20', 'unique:users,phone'],
-            'password' => ['required', 'confirmed', Password::min(8)],
-        ]);
+        $data = $request->validated();
 
         $user = User::create([
             'name' => $data['name'],
