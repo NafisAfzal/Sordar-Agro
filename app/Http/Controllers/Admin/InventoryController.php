@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AdjustStockRequest;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\InventoryService;
@@ -28,17 +29,13 @@ class InventoryController extends Controller
         return view('admin.products.inventory', compact('products'));
     }
 
-    public function adjust(Request $request, ProductVariant $variant, InventoryService $inventory)
+    public function adjust(AdjustStockRequest $request, ProductVariant $variant, InventoryService $inventory)
     {
-        $data = $request->validate([
-            // Signed delta: e.g. +10 new stock, -2 if two fish died.
-            'delta' => ['required', 'integer'],
-        ]);
+        $this->authorize('adjustStock', $variant->product);
 
-        $newStock = max(0, $variant->stock + $data['delta']);
-        $variant->update(['stock' => $newStock]);
-
-        $product = $variant->product;
+        $data = $request->validated();
+        $updated = $inventory->adjust($variant, (int) $data['delta']);
+        $product = $updated->product;
 
         // Fire restock notifications if this brought the product back in stock.
         if ($data['delta'] > 0) {
@@ -48,6 +45,6 @@ class InventoryController extends Controller
         }
 
         return back()->with('success',
-            "Stock for “{$product->name}” ({$variant->label}) set to {$newStock}.");
+            "Stock for “{$product->name}” ({$updated->label}) set to {$updated->stock}.");
     }
 }

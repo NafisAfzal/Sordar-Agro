@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class PasswordController extends Controller
 {
@@ -19,19 +21,9 @@ class PasswordController extends Controller
         return view('auth.change-password');
     }
 
-    public function updateChange(Request $request)
+    public function updateChange(UpdatePasswordRequest $request)
     {
         $user = $request->user();
-
-        // A seller using a temporary password should not need to know it,
-        // so we only require the current password for normal changes.
-        $rules = [
-            'password' => ['required', 'confirmed', PasswordRule::min(8)],
-        ];
-        if (! $user->must_change_password) {
-            $rules['current_password'] = ['required', 'current_password'];
-        }
-        $request->validate($rules);
 
         $user->forceFill([
             'password' => $request->password,
@@ -55,10 +47,8 @@ class PasswordController extends Controller
         return view('auth.forgot-password');
     }
 
-    public function sendResetLink(Request $request)
+    public function sendResetLink(ForgotPasswordRequest $request)
     {
-        $request->validate(['email' => ['required', 'email']]);
-
         $status = Password::sendResetLink($request->only('email'));
 
         // Never reveal whether an email address is registered: a throttled
@@ -79,14 +69,8 @@ class PasswordController extends Controller
         ]);
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(ResetPasswordRequest $request)
     {
-        $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', PasswordRule::min(8)],
-        ]);
-
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {

@@ -2,11 +2,22 @@
 
 namespace App\Providers;
 
+use App\Models\CareGuide;
 use App\Models\Cart;
+use App\Models\CommunitySubmission;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\User;
 use App\Models\Wishlist;
+use App\Observers\CacheInvalidationObserver;
+use App\Policies\OrderPolicy;
+use App\Policies\ProductPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -27,6 +38,23 @@ class AppServiceProvider extends ServiceProvider
     {
         // Bootstrap 5 friendly pagination markup.
         Paginator::useBootstrapFive();
+
+        // Object-level authorization for seller/admin product and order actions.
+        Gate::policy(Product::class, ProductPolicy::class);
+        Gate::policy(Order::class, OrderPolicy::class);
+
+        // Invalidate versioned read-model caches when source data changes.
+        foreach ([
+            Product::class,
+            ProductVariant::class,
+            Order::class,
+            OrderItem::class,
+            CareGuide::class,
+            CommunitySubmission::class,
+            User::class,
+        ] as $model) {
+            $model::observe(CacheInvalidationObserver::class);
+        }
 
         if ($this->app->environment('production')) {
             URL::forceScheme('https');

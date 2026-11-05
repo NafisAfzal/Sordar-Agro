@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Community\RejectSubmissionRequest;
 use App\Models\CommunitySubmission;
 use Illuminate\Http\Request;
 
@@ -29,10 +30,14 @@ class CommunityController extends Controller
         return back()->with('success', 'Submission approved and published.');
     }
 
-    public function reject(Request $request, CommunitySubmission $submission)
+    public function reject(RejectSubmissionRequest $request, CommunitySubmission $submission)
     {
-        $data = $request->validate(['admin_feedback' => ['nullable', 'string', 'max:1000']]);
-        $submission->update(['status' => 'rejected', 'admin_feedback' => $data['admin_feedback'] ?? null]);
+        $data = $request->validated();
+
+        $submission->update([
+            'status' => 'rejected',
+            'admin_feedback' => $data['admin_feedback'] ?? null,
+        ]);
 
         return back()->with('success', 'Submission rejected.');
     }

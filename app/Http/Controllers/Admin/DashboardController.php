@@ -8,163 +8,181 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, CacheService $cache)
     {
         $period = $request->input('period', 'all');
+        if (! in_array($period, ['all', 'today', 'week', 'month', 'custom'], true)) {
+            $period = 'all';
+        }
         $dateFrom = $this->resolveDateFrom($period, $request->input('date_from'));
         $dateTo = $this->resolveDateTo($period, $request->input('date_to'));
 
-        // All-time stats (sidebar cards — always visible regardless of filter).
-        $allTimeStats = [
-            'customers' => User::where('role', 'customer')->count(),
-            'sellers' => User::where('role', 'seller')->count(),
-            'products' => Product::count(),
-            'pending_products' => Product::where('status', 'pending')->count(),
-            'pending_community' => CommunitySubmission::where('status', 'pending')->count(),
-        ];
+        $data = Cache::remember(
+            $cache->dashboardKey('admin.dashboard', [
+                'period' => $period,
+                'from' => $dateFrom?->toDateString(),
+                'to' => $dateTo?->toDateString(),
+            ]),
+            now()->addMinutes(5),
+            function () use ($dateFrom, $dateTo) {
+                // All-time stats (sidebar cards — always visible regardless of filter).
+                $allTimeStats = [
+                    'customers' => User::where('role', 'customer')->count(),
+                    'sellers' => User::where('role', 'seller')->count(),
+                    'products' => Product::count(),
+                    'pending_products' => Product::where('status', 'pending')->count(),
+                    'pending_community' => CommunitySubmission::where('status', 'pending')->count(),
+                ];
 
-        // Base query scoped to paid, non-cancelled orders within the selected period.
-        $paidOrders = Order::where('payment_status', 'paid')
-            ->where('status', '!=', 'cancelled');
+                // Base query scoped to paid, non-cancelled orders within the selected period.
+                $paidOrders = Order::where('payment_status', 'paid')
+                    ->where('status', '!=', 'cancelled');
 
-        if ($dateFrom) {
-            $paidOrders->where('orders.created_at', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $paidOrders->where('orders.created_at', '<=', Carbon::parse($dateTo)->endOfDay());
-        }
+                if ($dateFrom) {
+                    $paidOrders->where('orders.created_at', '>=', $dateFrom);
+                }
+                if ($dateTo) {
+                    $paidOrders->where('orders.created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+                }
 
-        // Period-scoped summary stats.
-        $periodOrders = (clone $paidOrders)->count();
-        $periodRevenue = (float) (clone $paidOrders)->sum('total');
+                // Period-scoped summary stats.
+                $periodOrders = (clone $paidOrders)->count();
+                $periodRevenue = (float) (clone $paidOrders)->sum('total');
 
-        // Marketplace/admin earnings from seller products.
-        $marketplaceEarnings = (float) (clone $paidOrders)
-            ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-            ->sum(DB::raw('order_items.quantity * order_items.marketplace_share_amount'));
+                // Marketplace/admin earnings from seller products.
+                $marketplaceEarnings = (float) (clone $paidOrders)
+                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->sum(DB::raw('order_items.quantity * order_items.marketplace_share_amount'));
 
-        // Breakdown: admin own-product sales vs seller-product sales.
-        $orderItemQuery = OrderItem::whereHas('order', fn ($q) => $q
-            ->where('payment_status', 'paid')
-            ->where('orders.status', '!=', 'cancelled')
+                // Breakdown: admin own-product sales vs seller-product sales.
+                $orderItemQuery = OrderItem::whereHas('order', fn ($q) => $q
+                    ->where('payment_status', 'paid')
+                    ->where('orders.status', '!=', 'cancelled')
+                );
+                if ($dateFrom) {
+                    $orderItemQuery->whereHas('order', fn ($q) => $q->where('orders.created_at', '>=', $dateFrom));
+                }
+                if ($dateTo) {
+                    $orderItemQuery->whereHas('order', fn ($q) => $q->where('orders.created_at', '<=', Carbon::parse($dateTo)->endOfDay()));
+                }
+
+                $ownProductSales = (float) (clone $orderItemQuery)
+                    ->whereHas('variant.product', fn ($q) => $q->whereNull('seller_id'))
+                    ->selectRaw('COALESCE(SUM(order_items.price * order_items.quantity), 0) as total')
+                    ->value('total');
+
+                $sellerProductSales = (float) (clone $orderItemQuery)
+                    ->whereHas('variant.product', fn ($q) => $q->whereNotNull('seller_id'))
+                    ->selectRaw('COALESCE(SUM(order_items.price * order_items.quantity), 0) as total')
+                    ->value('total');
+
+                $totalUnitsSold = (int) (clone $orderItemQuery)->sum('quantity');
+
+                // Product-level sales — grouped by product with seller info.
+                $salesByProduct = DB::table('order_items')
+                    ->join('product_variants', 'order_items.product_variant_id', '=', 'product_variants.id')
+                    ->join('products', 'product_variants.product_id', '=', 'products.id')
+                    ->leftJoin('users', 'products.seller_id', '=', 'users.id')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('orders.payment_status', 'paid')
+                    ->where('orders.status', '!=', 'cancelled');
+
+                if ($dateFrom) {
+                    $salesByProduct->where('orders.created_at', '>=', $dateFrom);
+                }
+                if ($dateTo) {
+                    $salesByProduct->where('orders.created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+                }
+
+                $salesByProduct = $salesByProduct
+                    ->groupBy('products.id', 'products.name')
+                    ->groupBy('users.name')
+                    ->selectRaw('
+                        products.name as product_name,
+                        products.seller_id,
+                        COALESCE(users.name, "Marketplace") as seller_name,
+                        SUM(order_items.quantity) as units_sold,
+                        SUM(order_items.quantity * order_items.price) as revenue,
+                        SUM(order_items.quantity * order_items.marketplace_share_amount) as marketplace_earned
+                    ')
+                    ->orderByDesc('revenue')
+                    ->get();
+
+                // Marketplace share breakdown by seller and product.
+                $shareBreakdown = DB::table('order_items')
+                    ->join('product_variants', 'order_items.product_variant_id', '=', 'product_variants.id')
+                    ->join('products', 'product_variants.product_id', '=', 'products.id')
+                    ->leftJoin('users', 'products.seller_id', '=', 'users.id')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('orders.payment_status', 'paid')
+                    ->where('orders.status', '!=', 'cancelled');
+
+                if ($dateFrom) {
+                    $shareBreakdown->where('orders.created_at', '>=', $dateFrom);
+                }
+                if ($dateTo) {
+                    $shareBreakdown->where('orders.created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+                }
+
+                $shareBreakdown = $shareBreakdown
+                    ->groupBy('products.id', 'products.name')
+                    ->groupBy('users.name')
+                    ->selectRaw('products.name as product_name, COALESCE(users.name, "Marketplace") as seller_name,
+                        SUM(order_items.quantity) as units_sold,
+                        SUM(order_items.quantity * order_items.marketplace_share_amount) as share_earned')
+                    ->orderByDesc('share_earned')
+                    ->get();
+
+                $recentOrders = Order::with('user')->latest()->take(8)->get();
+
+                // ── Operations snapshot — marketplace-wide, period-independent ──
+                $processingOrders = Order::where('status', 'processing')->where('payment_status', 'paid')->count();
+                $pendingPayments = Order::where('payment_status', Order::PAYMENT_UNPAID)
+                    ->whereNotNull('transaction_id')
+                    ->where('status', '!=', 'cancelled')
+                    ->count();
+                $outOfStockProducts = DB::table('products')
+                    ->leftJoin('product_variants', 'product_variants.product_id', '=', 'products.id')
+                    ->groupBy('products.id')
+                    ->havingRaw('COALESCE(SUM(product_variants.stock),0) = 0')
+                    ->get()->count();
+                // Low stock = 1..5 units across variants (approved products only matter operationally, but show all for visibility)
+                $lowStockProductsCount = DB::table('products')
+                    ->leftJoin('product_variants', 'product_variants.product_id', '=', 'products.id')
+                    ->groupBy('products.id')
+                    ->havingRaw('COALESCE(SUM(product_variants.stock),0) BETWEEN 1 AND 5')
+                    ->get()->count();
+
+                return array_merge($allTimeStats, [
+                    'processingOrders' => $processingOrders,
+                    'pendingPayments' => $pendingPayments,
+                    'outOfStockProducts' => $outOfStockProducts,
+                    'lowStockProductsCount' => $lowStockProductsCount,
+                    'periodOrders' => $periodOrders,
+                    'periodRevenue' => $periodRevenue,
+                    'marketplaceEarnings' => $marketplaceEarnings,
+                    'ownProductSales' => $ownProductSales,
+                    'sellerProductSales' => $sellerProductSales,
+                    'totalUnitsSold' => $totalUnitsSold,
+                    'salesByProduct' => $salesByProduct,
+                    'shareBreakdown' => $shareBreakdown,
+                    'recentOrders' => $recentOrders,
+                ]);
+            }
         );
-        if ($dateFrom) {
-            $orderItemQuery->whereHas('order', fn ($q) => $q->where('orders.created_at', '>=', $dateFrom));
-        }
-        if ($dateTo) {
-            $orderItemQuery->whereHas('order', fn ($q) => $q->where('orders.created_at', '<=', Carbon::parse($dateTo)->endOfDay()));
-        }
 
-        $ownProductSales = (float) (clone $orderItemQuery)
-            ->whereHas('variant.product', fn ($q) => $q->whereNull('seller_id'))
-            ->selectRaw('COALESCE(SUM(order_items.price * order_items.quantity), 0) as total')
-            ->value('total');
-
-        $sellerProductSales = (float) (clone $orderItemQuery)
-            ->whereHas('variant.product', fn ($q) => $q->whereNotNull('seller_id'))
-            ->selectRaw('COALESCE(SUM(order_items.price * order_items.quantity), 0) as total')
-            ->value('total');
-
-        $totalUnitsSold = (int) (clone $orderItemQuery)->sum('quantity');
-
-        // Product-level sales — grouped by product with seller info.
-        $salesByProduct = DB::table('order_items')
-            ->join('product_variants', 'order_items.product_variant_id', '=', 'product_variants.id')
-            ->join('products', 'product_variants.product_id', '=', 'products.id')
-            ->leftJoin('users', 'products.seller_id', '=', 'users.id')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where('orders.payment_status', 'paid')
-            ->where('orders.status', '!=', 'cancelled');
-
-        if ($dateFrom) {
-            $salesByProduct->where('orders.created_at', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $salesByProduct->where('orders.created_at', '<=', Carbon::parse($dateTo)->endOfDay());
-        }
-
-        $salesByProduct = $salesByProduct
-            ->groupBy('products.id', 'products.name')
-            ->groupBy('users.name')
-            ->selectRaw('
-                products.name as product_name,
-                products.seller_id,
-                COALESCE(users.name, "Marketplace") as seller_name,
-                SUM(order_items.quantity) as units_sold,
-                SUM(order_items.quantity * order_items.price) as revenue,
-                SUM(order_items.quantity * order_items.marketplace_share_amount) as marketplace_earned
-            ')
-            ->orderByDesc('revenue')
-            ->get();
-
-        // Marketplace share breakdown by seller and product.
-        $shareBreakdown = DB::table('order_items')
-            ->join('product_variants', 'order_items.product_variant_id', '=', 'product_variants.id')
-            ->join('products', 'product_variants.product_id', '=', 'products.id')
-            ->leftJoin('users', 'products.seller_id', '=', 'users.id')
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->where('orders.payment_status', 'paid')
-            ->where('orders.status', '!=', 'cancelled');
-
-        if ($dateFrom) {
-            $shareBreakdown->where('orders.created_at', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $shareBreakdown->where('orders.created_at', '<=', Carbon::parse($dateTo)->endOfDay());
-        }
-
-        $shareBreakdown = $shareBreakdown
-            ->groupBy('products.id', 'products.name')
-            ->groupBy('users.name')
-            ->selectRaw('products.name as product_name, COALESCE(users.name, "Marketplace") as seller_name,
-                SUM(order_items.quantity) as units_sold,
-                SUM(order_items.quantity * order_items.marketplace_share_amount) as share_earned')
-            ->orderByDesc('share_earned')
-            ->get();
-
-        $recentOrders = Order::with('user')->latest()->take(8)->get();
-
-        // ── Operations snapshot — marketplace-wide, period-independent ──
-        $processingOrders = Order::where('status', 'processing')->where('payment_status', 'paid')->count();
-        $pendingPayments = Order::where('payment_status', Order::PAYMENT_UNPAID)
-            ->whereNotNull('transaction_id')
-            ->where('status', '!=', 'cancelled')
-            ->count();
-        $outOfStockProducts = DB::table('products')
-            ->leftJoin('product_variants', 'product_variants.product_id', '=', 'products.id')
-            ->groupBy('products.id')
-            ->havingRaw('COALESCE(SUM(product_variants.stock),0) = 0')
-            ->get()->count();
-        // Low stock = 1..5 units across variants (approved products only matter operationally, but show all for visibility)
-        $lowStockProductsCount = DB::table('products')
-            ->leftJoin('product_variants', 'product_variants.product_id', '=', 'products.id')
-            ->groupBy('products.id')
-            ->havingRaw('COALESCE(SUM(product_variants.stock),0) BETWEEN 1 AND 5')
-            ->get()->count();
-
-        return view('admin.dashboard', array_merge($allTimeStats, [
-            'processingOrders' => $processingOrders,
-            'pendingPayments' => $pendingPayments,
-            'outOfStockProducts' => $outOfStockProducts,
-            'lowStockProductsCount' => $lowStockProductsCount,
+        return view('admin.dashboard', array_merge($data, [
             'period' => $period,
             'dateFrom' => $dateFrom?->format('Y-m-d'),
             'dateTo' => $dateTo?->format('Y-m-d'),
-            'periodOrders' => $periodOrders,
-            'periodRevenue' => $periodRevenue,
-            'marketplaceEarnings' => $marketplaceEarnings,
-            'ownProductSales' => $ownProductSales,
-            'sellerProductSales' => $sellerProductSales,
-            'totalUnitsSold' => $totalUnitsSold,
-            'salesByProduct' => $salesByProduct,
-            'shareBreakdown' => $shareBreakdown,
-            'recentOrders' => $recentOrders,
         ]));
     }
 
